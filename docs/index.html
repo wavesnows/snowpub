@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>snowote · 雪记</title>
-  <meta name="description" content="轻量本地优先笔记应用，支持 Markdown、Git 同步和版本历史。" />
+  <title>snowpub</title>
+  <meta name="description" content="本地优先的微信公众号写作与发布工具，支持 Markdown 编辑、微信样式预览、一键发布到公众号。" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary: #409eff;
+      --primary: #07c160;
+      --primary-dark: #06ad56;
       --text: #303133;
       --muted: #606266;
       --border: #e4e7ed;
@@ -25,7 +26,7 @@
 
     /* ── Hero ── */
     .hero {
-      background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+      background: linear-gradient(135deg, #f0faf3 0%, #e8f5e9 100%);
       padding: 80px 24px 64px;
       text-align: center;
     }
@@ -43,17 +44,10 @@
       margin-bottom: 8px;
     }
 
-    .hero h1 span {
-      color: var(--muted);
-      font-weight: 400;
-      font-size: 0.6em;
-      margin-left: 10px;
-    }
-
     .hero p {
       font-size: 1.15rem;
       color: var(--muted);
-      max-width: 520px;
+      max-width: 560px;
       margin: 0 auto 32px;
     }
 
@@ -81,10 +75,10 @@
     .btn-primary {
       background: var(--primary);
       color: #fff;
-      box-shadow: 0 4px 12px rgba(64,158,255,0.35);
+      box-shadow: 0 4px 12px rgba(7,193,96,0.35);
     }
 
-    .btn-primary:hover { background: #2d8cf0; transform: translateY(-1px); }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
 
     .btn-outline {
       background: #fff;
@@ -204,13 +198,13 @@
   <!-- Hero -->
   <section class="hero">
     <span class="hero-icon">❄️</span>
-    <h1>snowote <span>雪记</span></h1>
-    <p>轻量、本地优先的笔记应用。支持 Markdown 与富文本编辑，Git 同步备份，版本历史随时恢复。</p>
+    <h1>snowpub</h1>
+    <p>本地优先的微信公众号写作与发布工具。用 Markdown 写作，实时预览微信样式，一键发布到公众号。</p>
     <div class="hero-actions">
       <a href="#download" class="btn btn-primary">
         ⬇ 立即下载
       </a>
-      <a href="https://github.com/wavesnows/snowote" class="btn btn-outline">
+      <a href="https://github.com/wavesnows/snowpub" class="btn btn-outline">
         ⭐ Star on GitHub
       </a>
     </div>
@@ -218,7 +212,7 @@
 
   <!-- Screenshot -->
   <section class="screenshot-section">
-    <img src="Screenshot.png" alt="snowote 界面截图" />
+    <img src="Screenshot.png" alt="snowpub 界面截图" />
   </section>
 
   <!-- Features -->
@@ -226,29 +220,39 @@
     <h2>核心功能</h2>
     <div class="features-grid">
       <div class="feature-card">
-        <span class="icon">📝</span>
-        <h3>双编辑器</h3>
-        <p>富文本编辑器（EditorJS）和 Markdown 编辑器（CodeMirror）随时切换，满足不同写作习惯。</p>
+        <span class="icon">✍️</span>
+        <h3>双栏编辑</h3>
+        <p>左侧 Markdown（CodeMirror）编辑，右侧微信样式实时预览，所见即所得。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🎨</span>
+        <h3>微信主题</h3>
+        <p>内置微信绿、科技黑、活力橙、默认白四套主题，随时切换。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🚀</span>
+        <h3>一键发布</h3>
+        <p>通过公众号官方 API：保存草稿、发布、查询发布状态，全流程本地完成。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🖼️</span>
+        <h3>图片素材库</h3>
+        <p>本地图片上传到公众号素材库，文章封面图选择，发布时正文图片自动上传替换。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">📥</span>
+        <h3>草稿箱同步</h3>
+        <p>拉取、删除、直接发布公众号已有草稿，本地与云端草稿统一管理。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🔗</span>
+        <h3>外链转底部引用</h3>
+        <p>自动将外链转为微信友好的底部脚注，避免公众号正文外链不显示的问题。</p>
       </div>
       <div class="feature-card">
         <span class="icon">🔄</span>
         <h3>Git 同步</h3>
-        <p>支持 GitHub 和 Gitee，一键推送/拉取。启动时自动同步，数据永不丢失。</p>
-      </div>
-      <div class="feature-card">
-        <span class="icon">🕐</span>
-        <h3>版本历史</h3>
-        <p>基于 Git 的版本历史，浏览任意提交记录，随时预览并恢复历史版本。</p>
-      </div>
-      <div class="feature-card">
-        <span class="icon">🔍</span>
-        <h3>全文搜索</h3>
-        <p>跨所有笔记即时搜索，快速定位任何内容。</p>
-      </div>
-      <div class="feature-card">
-        <span class="icon">⌨</span>
-        <h3>内置终端</h3>
-        <p>按 Ctrl+` 唤出终端，自动定位到当前笔记所在目录，无需切换应用。</p>
+        <p>支持 GitHub 和 Gitee，一键推送/拉取。版本历史随时浏览恢复。</p>
       </div>
       <div class="feature-card">
         <span class="icon">🌐</span>
@@ -263,33 +267,33 @@
     <h2>立即下载</h2>
     <p id="dl-version" style="color:var(--muted)">正在获取最新版本...</p>
     <div class="download-btns">
-      <a id="dl-mac-arm64" href="https://github.com/wavesnows/snowote/releases/latest" class="btn btn-primary">
+      <a id="dl-mac-arm64" href="https://github.com/wavesnows/snowpub/releases/latest" class="btn btn-primary">
         🍎 macOS Apple Silicon
       </a>
-      <a id="dl-mac-x64" href="https://github.com/wavesnows/snowote/releases/latest" class="btn btn-primary">
+      <a id="dl-mac-x64" href="https://github.com/wavesnows/snowpub/releases/latest" class="btn btn-primary">
         🍎 macOS Intel
       </a>
-      <a id="dl-win" href="https://github.com/wavesnows/snowote/releases/latest" class="btn btn-primary" style="background:linear-gradient(135deg,#0078d4,#005a9e)">
+      <a id="dl-win" href="https://github.com/wavesnows/snowpub/releases/latest" class="btn btn-primary" style="background:linear-gradient(135deg,#0078d4,#005a9e)">
         🪟 Windows
       </a>
     </div>
     <div class="download-btns" style="margin-top:12px">
-      <a href="https://github.com/wavesnows/snowote/releases" class="btn btn-outline">
+      <a href="https://github.com/wavesnows/snowpub/releases" class="btn btn-outline">
         所有版本
       </a>
-      <a href="https://github.com/wavesnows/snowote" class="btn btn-outline">
+      <a href="https://github.com/wavesnows/snowpub" class="btn btn-outline">
         查看源码
       </a>
     </div>
     <p class="download-note">开源免费 · MIT 协议</p>
     <p style="font-size:0.82rem;color:#c0c4cc;margin-top:12px;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.6">
       💡 <strong>macOS 提示：</strong>应用暂未签名，首次打开若提示「已损坏」，请在终端执行：<br>
-      <code style="background:#f5f7fa;padding:2px 8px;border-radius:4px;font-size:0.85em">xattr -cr /Applications/Snowote.app</code>
+      <code style="background:#f5f7fa;padding:2px 8px;border-radius:4px;font-size:0.85em">xattr -cr /Applications/snowpub.app</code>
     </p>
   </section>
 
   <script>
-    fetch('https://api.github.com/repos/wavesnows/snowote/releases/latest')
+    fetch('https://api.github.com/repos/wavesnows/snowpub/releases/latest')
       .then(r => r.json())
       .then(data => {
         document.getElementById('dl-version').textContent =
@@ -313,10 +317,10 @@
   <!-- Footer -->
   <footer>
     <div class="footer-links">
-      <a href="https://github.com/wavesnows/snowote">GitHub</a>
-      <a href="https://github.com/wavesnows/snowote/releases">Releases</a>
+      <a href="https://github.com/wavesnows/snowpub">GitHub</a>
+      <a href="https://github.com/wavesnows/snowpub/releases">Releases</a>
       <a href="guide.html">文档</a>
-      <a href="https://github.com/wavesnows/snowote/issues">反馈问题</a>
+      <a href="https://github.com/wavesnows/snowpub/issues">反馈问题</a>
     </div>
     <p>MIT © <a href="https://github.com/wavesnows">wavesnows</a> · 用 ❤️ 构建</p>
   </footer>

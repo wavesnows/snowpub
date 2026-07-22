@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import {getNoteLabel} from '@/libs/noteUtil'
-import { useTtsStore, editorInstance,Tree } from "@/store/store";
+import { useTtsStore,Tree } from "@/store/store";
 import Node from 'element-plus/es/components/tree/src/model/node'
 import {updateTreeMenu} from "@/libs/treeMenu"
 import {showMessage} from '@/libs/globalLib'
@@ -12,7 +12,7 @@ import { log, dir } from '@/libs/logger'
      // ttsStore.treeMenu.data = readDir();
     let ttsStore = useTtsStore()
     var destPath = path.dirname(ttsStore.inputs.notePath)
-    const ext = path.extname(ttsStore.inputs.notePath) || '.json'
+    const ext = path.extname(ttsStore.inputs.notePath) || '.md'
     var destPath = path.join(destPath, ttsStore.cnote.destTitle + ext)
     //log(destPath)
     //log(ttsStore.inputs.notePath)
@@ -259,7 +259,7 @@ export function addHandler(){
   let data = ttsStore.inputs.itemData
   dir(data)
   let label:string = getNoteLabel();
-  let filePath:any = path.join(data.path,label+'.json')
+  let filePath:any = path.join(data.path,label+'.md')
   const newChild:Tree = {label: label, isFolder:false, path: filePath, isLeaf: true}
   if (!data.children) {
     data.children = []

@@ -5,7 +5,7 @@
         "id": "k32DUVd3vV",
         "type": "header",
         "data": {
-          "text": "Welcome to Yesnote",
+          "text": "Welcome to snowpub",
           "level": 2
         }
       },
@@ -15,8 +15,8 @@
         "data": {
           "style": "ordered",
           "items": [
-            "Yesnote is awesome",
-            "Yesnote is amazing"
+            "snowpub is awesome",
+            "snowpub is amazing"
           ]
         }
       }

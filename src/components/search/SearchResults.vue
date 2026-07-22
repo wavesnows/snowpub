@@ -91,14 +91,7 @@ const handleResultClick = (result: SearchResult) => {
     ttsStore.inputs.notePath = result.filePath;
     ttsStore.setLastEditNote();
 
-    if (result.filePath.endsWith('.md')) {
-      // MarkdownEditor loads via watch on notePath
-    } else {
-      const data = fs.readFileSync(result.filePath, 'utf8');
-      const jsonData = JSON.parse(data);
-      ttsStore.editerData = jsonData;
-    }
-
+    // 所有文件内容由 MarkdownEditor 的 notePath watcher 加载
     ttsStore.clearSearch();
   } catch (error) {
     console.error('Error loading note:', error);

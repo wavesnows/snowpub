@@ -1,21 +1,25 @@
-# snowote（雪记）
+# snowpub
 
-A lightweight, local-first note-taking app built with Electron and Vue 3. Write in Markdown or rich text, sync with Git, and browse version history — all without leaving your desktop.
+A local-first WeChat Official Account writing & publishing tool built with Electron and Vue 3. Write in Markdown, preview in WeChat style, sync with Git, and publish to your Official Account — all without leaving your desktop.
 
-[官网](https://snowote.wavesnows.com) · [Download](../../releases) · [Guide](docs/guide.md) · [中文说明](README_CN.md)
+[官网](https://snowpub.wavesnows.com) · [Download](../../releases) · [Guide](docs/guide.md) · [中文说明](README_CN.md)
 
 ---
 
-![snowote](docs/Screenshot.png)
+![snowpub](docs/Screenshot.png)
 
 ## Features
 
-- **Dual editor** — Markdown (CodeMirror) or rich text (EditorJS), switch anytime
+- **Dual-pane editor** — Markdown (CodeMirror) on the left, WeChat-styled preview on the right
+- **WeChat themes** — Green / Black / Orange / Plain, switchable anytime
+- **Publish to WeChat** — Via Official Account API: save drafts, publish, query status
+- **Image library** — Upload local images to WeChat material library, pick cover for articles
+- **Draft sync** — Fetch / delete / publish existing drafts from your OA draft box
+- **Footnote references** — External links auto-converted to bottom citations (WeChat-friendly)
 - **Git sync** — Push/pull to GitHub or Gitee with one click
 - **Version history** — Browse git commit history, preview and restore any version
 - **Full-text search** — Search across all notes instantly
-- **Terminal** — Built-in terminal, auto-navigates to current note's directory
-- **Built-in terminal** — Quick access terminal panel (`Ctrl+\``)
+- **Built-in terminal** — Quick access terminal panel (`Ctrl+\``), auto-navigates to current note's directory
 - **Favorites & Recent** — Pin, star, and quickly revisit notes
 - **i18n** — English and Chinese UI
 
@@ -23,12 +27,12 @@ A lightweight, local-first note-taking app built with Electron and Vue 3. Write 
 
 Download the latest installer from [Releases](../../releases):
 
-- macOS: `snowote_x.x.x_arm64.dmg` (Apple Silicon) · `snowote_x.x.x_x64.dmg` (Intel)
-- Windows: `snowote_x.x.x.exe`
+- macOS: `snowpub_x.x.x_arm64.dmg` (Apple Silicon) · `snowpub_x.x.x_x64.dmg` (Intel)
+- Windows: `snowpub_x.x.x.exe`
 
 > **macOS note:** The app is not code-signed. If macOS says the app is damaged, run this in Terminal and try again:
 > ```bash
-> xattr -cr /Applications/Snowote.app
+> xattr -cr /Applications/snowpub.app
 > ```
 
 ## Build from Source
@@ -40,6 +44,19 @@ npm run dev      # development
 npm run build    # production build
 ```
 
+## WeChat Publishing Setup
+
+1. Open **Settings → WeChat OA**
+2. Enter your AppID and AppSecret (from OA console → Settings → Development → Basic Config)
+3. Add your machine's IP to the OA IP whitelist
+4. Click **Test Connection** to verify
+5. Open a `.md` note → click the WeChat preview icon in toolbar → write
+6. Click the publish icon → fill in title / author / digest / cover → **Save Draft** → **Publish**
+
+> Local images in your Markdown are auto-uploaded to WeChat and `src` replaced with OA URLs during publish.
+
+See [User Guide](docs/guide.md) for details.
+
 ## Git Sync Setup
 
 1. Open **Settings → Sync**
@@ -47,11 +64,9 @@ npm run build    # production build
 3. Enter your username, repository name, and personal access token
 4. Use the git button in the toolbar or configure auto-sync in **Scheduler**
 
-See [User Guide](docs/user-guide.md) for details.
-
 ## Donate
 
-If snowote is useful to you, consider buying me a coffee ☕
+If snowpub is useful to you, consider buying me a coffee ☕
 
 <div align="center">
   <table>

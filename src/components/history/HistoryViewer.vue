@@ -109,7 +109,6 @@
     :title="t('history.previewTitle')"
     width="70%"
     top="5vh"
-    @opened="onDialogOpened"
   >
     <div class="preview-header">
       <span>{{ formatDate(selectedCommit?.date) }}</span>
@@ -128,16 +127,13 @@
       <div v-else-if="!history.previewData" class="preview-error">
         No preview data available
       </div>
-      <!-- md 文件：直接显示原始内容 -->
-      <div v-else-if="history.previewData._markdown !== undefined" class="preview-markdown">
+      <!-- 所有文件统一按纯文本预览 -->
+      <div v-else-if="history.previewData._markdown" class="preview-markdown">
         <pre class="md-raw">{{ history.previewData._markdown }}</pre>
       </div>
-      <div v-else-if="!history.previewData.blocks || history.previewData.blocks.length === 0" class="preview-empty">
+      <div v-else class="preview-empty">
         <el-icon><Document /></el-icon>
         <p>This file was empty in this version</p>
-      </div>
-      <div v-else>
-        <div id="preview-editor-holder" class="preview-editor"></div>
       </div>
     </div>
     <template #footer>
@@ -152,21 +148,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTtsStore } from '@/store/store';
 import { storeToRefs } from 'pinia';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { Clock, Loading, User, DocumentCopy, WarningFilled, Document } from '@element-plus/icons-vue';
-import EditorJS from '@editorjs/editorjs';
-import Header from '@editorjs/header';
-import Underline from '@editorjs/underline';
-import Warning from "@editorjs/warning";
-import List from '@editorjs/list';
-import Quote from '@editorjs/quote';
-import Code from '@editorjs/code';
-import Table from '@editorjs/table';
-import Checklist from '@editorjs/checklist';
 import { basename } from 'path';
 import { log } from '@/libs/logger'
 const { ipcRenderer } = require('electron');
@@ -253,7 +240,6 @@ async function diffSelected() {
 }
 const previewError = ref(false);
 const selectedCommit = ref<any>(null);
-let previewEditorInstance: EditorJS | null = null;
 
 // Format date for display — show absolute date + relative time
 function formatDate(dateString: string): string {
@@ -300,120 +286,6 @@ async function previewCommit(commit: any) {
   }
 }
 
-// Initialize editor when dialog is fully opened
-async function onDialogOpened() {
-  log('Dialog opened, initializing editor...');
-  log('Preview data available:', !!history.value.previewData);
-  log('Preview error state:', previewError.value);
-  log('Preview loading state:', previewLoading.value);
-
-  // If there's an error or still loading, don't initialize editor
-  if (previewError.value || previewLoading.value) {
-    log('Skipping editor init - error or loading');
-    return;
-  }
-
-  // If no preview data, don't initialize
-  if (!history.value.previewData) {
-    log('No preview data available');
-    return;
-  }
-
-  // If empty file (no blocks), don't initialize editor - just show empty state
-  if (!history.value.previewData.blocks || history.value.previewData.blocks.length === 0) {
-    log('File is empty, showing empty state');
-    return;
-  }
-
-  // Destroy existing instance if any
-  if (previewEditorInstance) {
-    try {
-      await previewEditorInstance.destroy();
-      log('Destroyed previous editor instance');
-    } catch (e) {
-      log('Error destroying editor:', e);
-    }
-    previewEditorInstance = null;
-  }
-
-  // Wait for DOM to be ready
-  await nextTick();
-
-  // Check if element exists
-  const holder = document.getElementById('preview-editor-holder');
-  if (!holder) {
-    console.error('preview-editor-holder not found in DOM');
-    previewError.value = true;
-    return;
-  }
-
-  try {
-    // Ensure data has correct EditorJS format
-    const editorData = history.value.previewData;
-
-    log('Initializing editor with data:', {
-      time: editorData.time,
-      blocksCount: editorData.blocks?.length || 0,
-      version: editorData.version
-    });
-
-    // Initialize read-only EditorJS
-    previewEditorInstance = new EditorJS({
-      holder: 'preview-editor-holder',
-      data: editorData,
-      readOnly: true,
-      minHeight: 0,
-      tools: {
-        header: {
-          class: Header,
-          config: {
-            placeholder: 'Header'
-          },
-          inlineToolbar: ['link'],
-        },
-        list: List,
-        quote: Quote,
-        underline: Underline,
-        warning: {
-          class: Warning,
-          inlineToolbar: true,
-          config: {
-            titlePlaceholder: 'Title',
-            messagePlaceholder: 'Message',
-          },
-        },
-        code: {
-          class: Code as any,
-          config: {
-            placeholder: 'Enter code here...'
-          },
-        },
-        table: {
-          class: Table as any,
-          config: {
-            rows: 2,
-            cols: 3,
-            withHeadings: false
-          },
-          inlineToolbar: true,
-        },
-        checklist: {
-          class: Checklist as any,
-          inlineToolbar: true,
-        },
-      }
-    });
-
-    // Wait for editor to be ready
-    await previewEditorInstance.isReady;
-    log('✅ Preview editor ready! Blocks count:', editorData.blocks?.length || 0);
-  } catch (error: any) {
-    console.error('❌ Editor initialization error:', error);
-    console.error('Error message:', error?.message);
-    previewError.value = true;
-  }
-}
-
 // Confirm restore
 async function confirmRestore(commit: any) {
   if (!commit) return;
@@ -455,18 +327,6 @@ function goToSettings() {
   visible.value = false;
   ttsStore.config.drawer = true;
 }
-
-// Cleanup preview editor on close
-watch(previewVisible, async (newVal) => {
-  if (!newVal && previewEditorInstance) {
-    try {
-      await previewEditorInstance.destroy();
-    } catch (e) {
-      log('Error destroying editor on close:', e);
-    }
-    previewEditorInstance = null;
-  }
-});
 </script>
 
 <style scoped>

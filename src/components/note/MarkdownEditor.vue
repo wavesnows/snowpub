@@ -1,10 +1,19 @@
 <template>
-  <div class="md-editor-container" @keydown="handleContainerKeydown">
+  <div
+    class="md-editor-container"
+    :class="{ 'md-split-layout': isWechatSplit }"
+    @keydown="handleContainerKeydown"
+  >
+    <!-- editorEl 必须常驻 DOM：CodeMirror 挂载后不能随布局切换被销毁 -->
     <div
       v-show="ttsStore.mdMode === 'edit'"
       ref="editorEl"
       class="md-codemirror"
+      :class="{ 'md-split-left': isWechatSplit }"
     ></div>
+    <div v-if="isWechatSplit" class="md-split-right">
+      <WechatPreview :content="content" />
+    </div>
     <div v-show="ttsStore.mdMode === 'preview'" class="md-preview-wrapper">
       <div v-show="searchVisible" class="md-search-bar">
         <input
@@ -47,6 +56,8 @@ import { Compartment, EditorState } from '@codemirror/state'
 import MarkdownIt from 'markdown-it'
 import Mark from 'mark.js'
 import { useTtsStore } from '@/store/store'
+import WechatPreview from '@/components/wechat/WechatPreview.vue'
+import { stripFrontMatter } from '@/libs/frontMatter'
 import '@/assets/md-preview.css'
 
 const fs = require('fs')
@@ -55,6 +66,8 @@ const ttsStore = useTtsStore()
 const editorEl = ref<HTMLElement | null>(null)
 const previewEl = ref<HTMLElement | null>(null)
 const content = ref('')
+// 公众号双栏模式：左编辑 + 右微信预览
+const isWechatSplit = computed(() => ttsStore.mdPreviewSplit === 'wechat' && ttsStore.mdMode === 'edit')
 let cmView: EditorView | null = null
 let saveStatusTimer: ReturnType<typeof setTimeout> | null = null
 const searchVisible = ref(false)
@@ -101,7 +114,7 @@ md.renderer.rules.heading_open = (tokens: any[], idx: number, options: any, env:
   return defaultHeadingRenderer(tokens, idx, options, env, self)
 }
 
-const renderedHtml = computed(() => md.render(content.value))
+const renderedHtml = computed(() => md.render(stripFrontMatter(content.value)))
 
 const searchCountText = computed(() => {
   if (!query.value) return ''
@@ -300,9 +313,18 @@ watch(
 watch(
   () => ttsStore.inputs.notePath,
   (newPath) => {
-    if (newPath && (!newPath.endsWith('.json') || ttsStore.showHiddenFiles)) {
+    if (newPath) {
       loadFile(newPath)
     }
+  }
+)
+
+// 历史版本恢复后重新从磁盘加载当前文件
+watch(
+  () => ttsStore.noteReloadTrigger,
+  () => {
+    const p = ttsStore.inputs.notePath
+    if (p) loadFile(p)
   }
 )
 
@@ -389,6 +411,28 @@ function copyPreviewHtml() {
   flex-direction: column;
   width: 100%;
   height: 100%;
+}
+
+/* WeChat dual-pane layout: left editor + right wechat preview */
+.md-split-layout {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.md-split-left {
+  flex: 1;
+  overflow: auto;
+  height: 100%;
+  border-right: 1px solid #e4e7ed;
+}
+
+.md-split-right {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
 }
 
 .md-codemirror {

@@ -34,8 +34,8 @@
           </ul>
           <h3>{{ t('help.noteTypes') }}</h3>
           <ul>
-            <li><strong>.json</strong> — {{ t('help.jsonNoteDesc') }}</li>
             <li><strong>.md</strong> — {{ t('help.mdNoteDesc') }}</li>
+            <li><strong>.json</strong> — {{ t('help.jsonLegacyDesc') }}</li>
           </ul>
         </template>
 
@@ -55,8 +55,6 @@
         <!-- Editor -->
         <template v-if="activeSection === 'editor'">
           <h2>{{ t('help.editorTitle') }}</h2>
-          <h3>{{ t('help.jsonEditor') }}</h3>
-          <p>{{ t('help.jsonEditorDesc') }}</p>
           <h3>{{ t('help.mdEditor') }}</h3>
           <p>{{ t('help.mdEditorDesc') }}</p>
           <ul>
@@ -64,6 +62,8 @@
             <li>{{ t('help.mdFeature2') }}</li>
             <li>{{ t('help.mdFeature3') }}</li>
             <li>{{ t('help.mdFeature4') }}</li>
+            <li>{{ t('help.mdFeature5') }}</li>
+            <li>{{ t('help.mdFeature6') }}</li>
           </ul>
         </template>
 

@@ -1,28 +1,42 @@
 <template>
-  <!-- MD 编辑/预览切换 + 复制全文，仅 .md 文件时显示 -->
+  <!-- MD 文件专属：视图模式切换 + 编辑辅助 + 发布 -->
   <template v-if="isMdFile">
-    <el-tooltip :content="ttsStore.mdMode === 'edit' ? '切换到预览' : '切换到编辑'" class="tool-tooltip">
-      <el-button size="small" circle class="tool-btn" @click="toggleMdMode">
-        <el-icon v-if="ttsStore.mdMode === 'edit'"><View /></el-icon>
-        <el-icon v-else><EditPen /></el-icon>
+    <!-- 组1：视图模式 -->
+    <el-tooltip :content="t('tools.modeEdit')" class="tool-tooltip">
+      <el-button size="small" circle class="tool-btn" :type="mdViewMode === 'edit' ? 'primary' : ''" @click="mdViewMode = 'edit'">
+        <el-icon><EditPen /></el-icon>
       </el-button>
     </el-tooltip>
-    <el-tooltip v-if="ttsStore.mdMode === 'edit'" :content="ttsStore.mdEditor.lineWrap ? '关闭自动折行' : '开启自动折行'" class="tool-tooltip">
-      <el-button size="small" circle class="tool-btn" @click="ttsStore.mdEditor.lineWrap = !ttsStore.mdEditor.lineWrap" :type="ttsStore.mdEditor.lineWrap ? 'primary' : ''">
-        <el-icon><Minus /></el-icon>
+    <el-tooltip :content="t('tools.modePreview')" class="tool-tooltip">
+      <el-button size="small" circle class="tool-btn" :type="mdViewMode === 'preview' ? 'primary' : ''" @click="mdViewMode = 'preview'">
+        <el-icon><View /></el-icon>
       </el-button>
     </el-tooltip>
-    <el-tooltip v-if="ttsStore.mdMode === 'preview'" content="复制全文（带样式）" class="tool-tooltip">
+    <el-tooltip :content="t('tools.modeWechat')" class="tool-tooltip">
+      <el-button size="small" circle class="tool-btn" :type="mdViewMode === 'wechat' ? 'primary' : ''" @click="mdViewMode = 'wechat'">
+        <el-icon><Iphone /></el-icon>
+      </el-button>
+    </el-tooltip>
+    <span class="tool-divider"></span>
+    <!-- 组2：输出（复制 / 发布） -->
+    <el-tooltip v-if="mdViewMode === 'preview'" :content="t('tools.copyAll')" class="tool-tooltip">
       <el-button size="small" circle class="tool-btn" @click="copyAll">
         <el-icon><CopyDocument /></el-icon>
       </el-button>
     </el-tooltip>
+    <el-tooltip :content="hasWechatConfig ? t('wechat.publishBtn') : t('wechat.needConfig')" class="tool-tooltip">
+      <el-button
+        size="small"
+        circle
+        class="tool-btn"
+        @click="handlePublishClick"
+      >
+        <el-icon><Promotion /></el-icon>
+      </el-button>
+    </el-tooltip>
+    <span class="tool-divider"></span>
   </template>
-  <!--<el-tooltip content="Save">
-    <el-button size="small" circle class="tool-btn" @click="saveHandle">
-      <el-icon><DocumentAdd /></el-icon>
-    </el-button>
-  </el-tooltip>-->
+  <!-- 组4：文件操作 -->
   <el-tooltip :content="t('tools.deleteFile')" class="tool-tooltip">
     <el-button size="small" circle class="tool-btn" @click="removeHandle">
       <el-icon><Delete /></el-icon>
@@ -39,42 +53,61 @@
       <el-icon><Clock /></el-icon>
     </el-button>
   </el-tooltip>
+  <PublishDialog v-model="publishVisible" />
 </template>
 <script setup lang="ts">
 
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useTtsStore } from "@/store/store";
 import { storeToRefs } from "pinia";
 import {removeFile} from '@/libs/fileHandler'
-import {saveContent} from '@/libs/editor'
 import {ElMessageBox, ElMessage} from 'element-plus'
 import { useI18n } from 'vue-i18n'
-import { Clock, View, EditPen, CopyDocument, Minus } from '@element-plus/icons-vue'
+import { Clock, CopyDocument, Promotion } from '@element-plus/icons-vue'
+import PublishDialog from '@/components/wechat/PublishDialog.vue'
 import { log } from '@/libs/logger'
-//import {  DocumentAdd } from "@element-plus/icons-vue";
 
-//const currShow = ref(0);
 const { t } = useI18n()
 const ttsStore = useTtsStore();
-var { editerflag, readOnly, inputs } = storeToRefs(ttsStore);
+var { readOnly, inputs } = storeToRefs(ttsStore);
 
 const isMdFile = computed(() => inputs.value.notePath?.endsWith('.md') ?? false)
+const hasWechatConfig = computed(() => !!ttsStore.config.wechat.appId && !!ttsStore.config.wechat.appSecret)
+const publishVisible = ref(false)
 
-function toggleMdMode() {
-  ttsStore.mdMode = ttsStore.mdMode === 'edit' ? 'preview' : 'edit'
-}
+// 统一视图模式：edit（源码）| preview（预览）| wechat（公众号双栏）
+// 桥接 store 的 mdMode / mdPreviewSplit 两个标志，保证三种状态两两互斥、均可直达
+const mdViewMode = computed<'edit' | 'preview' | 'wechat'>({
+  get: () => {
+    if (ttsStore.mdPreviewSplit === 'wechat') return 'wechat'
+    return ttsStore.mdMode === 'preview' ? 'preview' : 'edit'
+  },
+  set: (v) => {
+    if (v === 'wechat') {
+      ttsStore.setMdPreviewSplit('wechat')
+      ttsStore.mdMode = 'edit'
+    } else {
+      ttsStore.setMdPreviewSplit('single')
+      ttsStore.mdMode = v
+    }
+  }
+})
 
 function copyAll() {
   ttsStore.triggerMdCopy()
-  ElMessage({ message: '已复制（含样式），可直接粘贴到公众号', type: 'success', duration: 2000 })
+  ElMessage({ message: t('tools.copyAll'), type: 'success', duration: 2000 })
 }
 
+// 未配置公众号时引导到设置 → 微信，而不是静默禁用
+function handlePublishClick() {
+  if (hasWechatConfig.value) {
+    publishVisible.value = true
+  } else {
+    ElMessage({ message: t('wechat.needConfig'), type: 'info', duration: 2500 })
+    ttsStore.openSettings('wechat')
+  }
+}
 
-function saveHandle(){
-    log("Save Btn")
-    //editerflag.value = true
-    saveContent()
-};
 
 function editHandle(){
   log("Edit Press")
@@ -106,7 +139,7 @@ function openHistory() {
 }
 
 </script>
-  
+
 <style scoped>
   .button {
     -webkit-app-region: no-drag;
@@ -129,6 +162,14 @@ function openHistory() {
 
   .tool-btn .el-icon {
     font-size: 14px;
+  }
+
+  .tool-divider {
+    width: 1px;
+    height: 16px;
+    background: #dcdfe6;
+    margin: 0 4px;
+    display: inline-block;
   }
 
   :deep(.el-tooltip__trigger) {

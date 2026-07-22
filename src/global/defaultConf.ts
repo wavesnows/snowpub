@@ -1,7 +1,7 @@
 const defaultConf = {
-  appName: "snowote",
-  storeName: "snowote",
-  defaultStore: "snowote",
+  appName: "snowpub",
+  storeName: "snowpub",
+  defaultStore: "snowpub",
   newFolderName: "MyFolder",
   defaultRepoPath: "repos",
   defaultRepoName: "default",

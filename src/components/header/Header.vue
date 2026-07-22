@@ -123,7 +123,7 @@ onUnmounted(() => {
 });
 
 function openGithub() {
-  shell.openExternal('https://github.com/wavesnows/snowote');
+  shell.openExternal('https://github.com/wavesnows/snowpub');
 }
 </script>
 

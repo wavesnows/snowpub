@@ -52,16 +52,12 @@ export function initDefaultNotebook(dir:string):string{
     if(!existsSync(dir)||existsSync(dir)&&isFolderEmpty(dir)){
         try {
             ensureDirSync(localNotePath);
-            // Create a demo note with valid EditorJS structure (no asset file dependency)
-            const demoNote = JSON.stringify({
-                time: Date.now(),
-                blocks: [
-                    { type: "header", data: { text: "Welcome to snowote 👋", level: 1 } },
-                    { type: "paragraph", data: { text: "This is your first note. Start writing!" } }
-                ],
-                version: "2.26.5"
-            }, null, 2);
-            writeFileSync(path.join(localNotePath, 'demo.json'), demoNote, 'utf8');
+            // Create a demo markdown note
+            const demoNote = `# Welcome to snowpub 👋
+
+This is your first note. Start writing!
+`;
+            writeFileSync(path.join(localNotePath, 'demo.md'), demoNote, 'utf8');
             str = "create default note book"
         } catch (e: any) {
             str = "init failed: " + e.message;

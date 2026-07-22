@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 872" width="2048" height="872">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F2FBF6"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="2048" height="872" fill="url(#bg)"/>
+
+  <!-- 背景装饰圆（极淡） -->
+  <circle cx="320" cy="240" r="180" fill="#07C160" opacity="0.05"/>
+  <circle cx="1780" cy="680" r="240" fill="#07C160" opacity="0.04"/>
+  <circle cx="1150" cy="180" r="90" fill="#4CC47C" opacity="0.05"/>
+
+  <!-- 钢笔尖（笔尖朝右上） -->
+  <g transform="translate(400,520) rotate(-40)">
+    <!-- 笔尖主体：经典钢笔尖几何形 -->
+    <path d="M 96,0
+             C 60,-8 30,-28 8,-52
+             C -20,-80 -52,-88 -72,-84
+             L -72,84
+             C -52,88 -20,80 8,52
+             C 30,28 60,8 96,0 Z"
+          fill="#1A3C34"/>
+    <!-- 中缝 -->
+    <path d="M 88,0 L 6,0" stroke="#F2FBF6" stroke-width="7" stroke-linecap="round"/>
+    <!-- 呼吸孔 -->
+    <circle cx="-6" cy="0" r="11" fill="#F2FBF6"/>
+  </g>
+
+  <!-- 飞行轨迹（虚线弧） -->
+  <path d="M 545,455 Q 660,320 800,262"
+        fill="none" stroke="#4CC47C" stroke-width="9"
+        stroke-linecap="round" stroke-dasharray="2 26"/>
+
+  <!-- 纸飞机（朝右微上扬） -->
+  <g transform="translate(880,235) rotate(-12)">
+    <!-- 上翼 -->
+    <path d="M 150,0 L -125,-82 L -52,-4 Z" fill="#07C160"/>
+    <!-- 下翼（深色折面） -->
+    <path d="M 150,0 L -52,-4 L -125,82 Z" fill="#04954B"/>
+    <!-- 尾部小折面 -->
+    <path d="M -52,-4 L -125,82 L -78,10 Z" fill="#067A3E"/>
+  </g>
+
+  <!-- 标题区 -->
+  <text x="1235" y="425"
+        font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Arial, sans-serif"
+        font-size="158" font-weight="600" letter-spacing="2"
+        fill="#1A3C34">Snowpub</text>
+
+  <!-- 标题下绿色小横条 -->
+  <rect x="1242" y="468" width="96" height="10" rx="5" fill="#07C160"/>
+
+  <!-- 副标题 -->
+  <text x="1240" y="575"
+        font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Arial, sans-serif"
+        font-size="56" font-weight="400" letter-spacing="6"
+        fill="#4CC47C">本地写作 · 一键发布</text>
+</svg>

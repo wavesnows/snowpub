@@ -1,7 +1,6 @@
 <template>
   <div class="main" :class="{ welcome: !hasNote }">
-    <MarkdownEditor v-if="hasNote && isMdFile" />
-    <Editor v-else-if="hasNote" v-model="inputs.noteValue" :initialData="inputs.noteValue" ref="editor" />
+    <MarkdownEditor v-if="hasNote" />
     <Welcome v-else />
   </div>
 </template>
@@ -10,21 +9,12 @@
 import { computed } from 'vue'
 import { useTtsStore } from '@/store/store'
 import { storeToRefs } from 'pinia'
-import Editor from '../note/Editor.vue'
 import MarkdownEditor from '../note/MarkdownEditor.vue'
 import Welcome from '../note/Welcome.vue'
 
 const store = useTtsStore()
-const { inputs, cnote } = storeToRefs(store)
+const { cnote } = storeToRefs(store)
 
-const isMdFile = computed(() => {
-  const p = inputs.value.notePath
-  if (!p) return false
-  // When showHiddenFiles is on, all files use CodeMirror
-  if (store.showHiddenFiles) return true
-  // Normal mode: .md and other non-.json files use CodeMirror
-  return !p.endsWith('.json')
-})
 const hasNote = computed(() => !!cnote.value.lastPath)
 </script>
 

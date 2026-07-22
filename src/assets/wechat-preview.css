@@ -1,0 +1,187 @@
+/* WeChat-styled preview themes. Applied to .wechat-preview when theme-* class is set on the root. */
+
+.wechat-preview {
+  font-size: 16px;
+  line-height: 1.75;
+  color: #333;
+  background: #fff;
+  padding: 16px 18px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.wechat-preview h1,
+.wechat-preview h2,
+.wechat-preview h3,
+.wechat-preview h4,
+.wechat-preview h5,
+.wechat-preview h6 {
+  font-weight: 700;
+  margin: 1.2em 0 0.6em;
+  line-height: 1.4;
+}
+
+.wechat-preview h1 { font-size: 22px; }
+.wechat-preview h2 { font-size: 20px; }
+.wechat-preview h3 { font-size: 18px; }
+.wechat-preview h4 { font-size: 16px; }
+
+.wechat-preview p {
+  margin: 0.8em 0;
+}
+
+.wechat-preview a {
+  color: #576b95;
+  text-decoration: none;
+  border-bottom: 1px solid #576b95;
+}
+
+.wechat-preview img {
+  max-width: 100%;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.wechat-preview blockquote {
+  margin: 1em 0;
+  padding: 8px 12px;
+  border-left: 3px solid #ccc;
+  color: #888;
+  background: #fafafa;
+  font-size: 14px;
+}
+
+.wechat-preview code {
+  font-family: -apple-system, SF Mono, Menlo, Consolas, monospace;
+  font-size: 13px;
+  background: #f0f0f0;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: #c7254e;
+}
+
+.wechat-preview pre {
+  background: #f6f8fa;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 1em 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.wechat-preview pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.wechat-preview ul,
+.wechat-preview ol {
+  padding-left: 1.6em;
+  margin: 0.8em 0;
+}
+
+.wechat-preview li { margin: 4px 0; }
+
+.wechat-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 14px;
+}
+
+.wechat-preview th,
+.wechat-preview td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.wechat-preview th { background: #f0f0f0; font-weight: 700; }
+
+.wechat-preview hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 1.6em 0;
+}
+
+/* ── 主题：微信绿（默认）──────────────────────────────────────── */
+.wechat-preview.theme-wechat-green h1,
+.wechat-preview.theme-wechat-green h2,
+.wechat-preview.theme-wechat-green h3 {
+  color: #07c160;
+  border-bottom: 1px solid #e8f5e9;
+  padding-bottom: 4px;
+}
+.wechat-preview.theme-wechat-green blockquote {
+  border-left-color: #07c160;
+  background: #f0faf3;
+  color: #5a7a66;
+}
+.wechat-preview.theme-wechat-green code {
+  color: #c7254e;
+  background: #fff5f5;
+}
+
+/* ── 主题：科技黑 ──────────────────────────────────────────── */
+.wechat-preview.theme-wechat-black {
+  color: #e8e8e8;
+  background: #1f1f1f;
+}
+.wechat-preview.theme-wechat-black h1,
+.wechat-preview.theme-wechat-black h2,
+.wechat-preview.theme-wechat-black h3 {
+  color: #ffffff;
+  border-bottom: 1px solid #444;
+  padding-bottom: 4px;
+}
+.wechat-preview.theme-wechat-black blockquote {
+  border-left-color: #ffd700;
+  background: #2a2a2a;
+  color: #aaa;
+}
+.wechat-preview.theme-wechat-black code {
+  color: #f08d49;
+  background: #2a2a2a;
+}
+.wechat-preview.theme-wechat-black pre {
+  background: #2d2d2d;
+  color: #e8e8e8;
+}
+.wechat-preview.theme-wechat-black a { color: #4ea1f3; border-bottom-color: #4ea1f3; }
+.wechat-preview.theme-wechat-black th { background: #2a2a2a; }
+.wechat-preview.theme-wechat-black th,
+.wechat-preview.theme-wechat-black td { border-color: #444; }
+
+/* ── 主题：活力橙 ──────────────────────────────────────────── */
+.wechat-preview.theme-wechat-orange h1,
+.wechat-preview.theme-wechat-orange h2,
+.wechat-preview.theme-wechat-orange h3 {
+  color: #ff8c00;
+  border-bottom: 1px solid #fff0e0;
+  padding-bottom: 4px;
+}
+.wechat-preview.theme-wechat-orange blockquote {
+  border-left-color: #ff8c00;
+  background: #fff8f0;
+  color: #8a6a4a;
+}
+.wechat-preview.theme-wechat-orange code {
+  color: #c7254e;
+  background: #fff5f5;
+}
+
+/* ── 主题：默认白 ──────────────────────────────────────────── */
+.wechat-preview.theme-wechat-default h1,
+.wechat-preview.theme-wechat-default h2,
+.wechat-preview.theme-wechat-default h3 {
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+.wechat-preview.theme-wechat-default blockquote {
+  border-left-color: #ccc;
+  background: #fafafa;
+  color: #888;
+}

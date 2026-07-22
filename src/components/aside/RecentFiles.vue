@@ -61,15 +61,7 @@ function openFile(file: { path: string; label: string; time: number }) {
   ttsStore.cnote.lastPath = file.path
   ttsStore.addRecentFile(file.path, file.label)
   ttsStore.setLastEditNote()
-
-  if (!file.path.endsWith('.md')) {
-    try {
-      const data = fs.readFileSync(file.path, 'utf8')
-      ttsStore.editerData = JSON.parse(data)
-    } catch (e) {
-      console.error('Failed to open recent file:', e)
-    }
-  }
+  // 文件内容由 MarkdownEditor 的 notePath watcher 加载
 }
 
 function removeRecent(path: string) {

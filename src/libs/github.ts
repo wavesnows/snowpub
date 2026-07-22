@@ -375,7 +375,7 @@ export async function gitHubPush(t: (key: string) => string): Promise<boolean> {
     if (status.files.length > 0) {
       // There are changes, commit them
       await git.add('.');
-      await git.commit('[snowote] add file');
+      await git.commit('[snowpub] add file');
     }
 
     // Check if there are commits to push

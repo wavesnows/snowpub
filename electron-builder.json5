@@ -1,6 +1,6 @@
 {
-  "appId": "com.wavesnow.snowote",
-  "productName": "Snowote",
+  "appId": "com.wavesnow.snowpub",
+  "productName": "Snowpub",
   "asar": true,
   "npmRebuild": false,
   "directories": {
@@ -18,7 +18,7 @@
     {
       "provider": "github",
       "owner": "wavesnows",
-      "repo": "snowote",
+      "repo": "snowpub",
       "releaseType": "release"
     }
   ],
@@ -47,6 +47,6 @@
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
     "deleteAppDataOnUninstall": false,
-    "shortcutName": "Snowote"
+    "shortcutName": "Snowpub"
   }
 }

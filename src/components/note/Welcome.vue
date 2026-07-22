@@ -3,11 +3,11 @@
     <div class="welcome-content">
       <div class="welcome-header">
         <div class="logo">
-          <el-icon :size="80" color="#409eff"><Document /></el-icon>
+          <img src="../../assets/brand/logo-mark.svg" alt="Snowpub" class="brand-mark" />
         </div>
-        <h1>{{ t('welcome.title') }}</h1>
+        <h1 class="brand-title">Snowpub</h1>
         <div class="header-version">v{{ appVersion }}</div>
-        <p class="subtitle">{{ t('help.aboutDesc') }}</p>
+        <p class="subtitle">{{ t('welcome.subtitle') }}</p>
       </div>
 
       <div class="welcome-body">
@@ -92,7 +92,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Document, DocumentAdd, Setting, QuestionFilled } from '@element-plus/icons-vue'
+import { DocumentAdd, Setting, QuestionFilled } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
 import { useTtsStore } from '@/store/store'
 
@@ -129,25 +129,25 @@ const createNote = async () => {
   const treeData = ttsStore.treeMenu.data
   if (treeData.length === 0) return
 
-  const notePath = path.join(treeData[0].path, 'Welcome.json')
-  const emptyEditorData = {
-    time: Date.now(),
-    blocks: [
-      { type: "header", data: { text: "Welcome to snowote 👋", level: 1 } },
-      { type: "paragraph", data: { text: "Start writing your notes here." } }
-    ],
-    version: "2.26.5"
-  }
+  const notePath = path.join(treeData[0].path, 'Welcome.md')
+  const welcomeContent = `# Welcome to Snowpub 👋
+
+Start writing your notes here.
+
+**Tips:**
+- 新建笔记均为 Markdown（.md）格式
+- 支持微信公众号预览与一键发布
+- 历史 .json 笔记会以纯文本形式打开
+`
 
   try {
-    fs.writeFileSync(notePath, JSON.stringify(emptyEditorData, null, 2), 'utf8')
+    fs.writeFileSync(notePath, welcomeContent, 'utf8')
     ttsStore.refreshTreeData()
     await new Promise(resolve => setTimeout(resolve, 200))
     ttsStore.inputs.notePath = notePath
     ttsStore.cnote.title = 'Welcome'
     ttsStore.cnote.destTitle = 'Welcome'
     ttsStore.cnote.lastPath = notePath
-    ttsStore.editerData = emptyEditorData
     ttsStore.setLastEditNote()
   } catch (error) {
     console.error('Failed to create note:', error)
@@ -164,7 +164,7 @@ onMounted(async () => {
 })
 
 function openGithub() {
-  shell.openExternal('https://github.com/wavesnows/snowote')
+  shell.openExternal('https://github.com/wavesnows/snowpub')
 }
 
 function openTerminal() {
@@ -192,7 +192,15 @@ function openTerminal() {
   margin-bottom: 40px;
 }
 
-.logo { margin-bottom: 20px; }
+.logo { margin-bottom: 8px; }
+.brand-mark { width: 130px; }
+.brand-title {
+  margin: 0 0 6px;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #1a3c34;
+}
 
 h1 {
   font-size: 32px;

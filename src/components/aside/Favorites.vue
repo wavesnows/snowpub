@@ -49,7 +49,6 @@ import { StarFilled, Close } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
 import fs from 'fs'
 import { basename } from 'path'
-import { log } from '@/libs/logger'
 
 const { t } = useI18n()
 const ttsStore = useTtsStore()
@@ -73,36 +72,14 @@ const starredNotes = computed(() => {
 
 // 打开笔记
 const openNote = (note: {path: string, label: string}) => {
+  if (!fs.existsSync(note.path)) return
   ttsStore.inputs.notePath = note.path
-
-  if (fs.existsSync(note.path)) {
-    fs.readFile(note.path, 'utf8', (err: any, data: any) => {
-      if (err) {
-        console.error(err)
-        return
-      }
-
-      ttsStore.cnote.title = note.label
-      ttsStore.cnote.destTitle = note.label
-      ttsStore.cnote.lastPath = note.path
-      ttsStore.addRecentFile(note.path, note.label)
-
-      data = data.trim().replace('\n', '')
-      if (data === "") {
-        log('empty file')
-        if (ttsStore.editorInstance) {
-          ttsStore.editorInstance.clear()
-        }
-      } else {
-        try {
-          const jsonData = JSON.parse(data)
-          ttsStore.editerData = jsonData
-        } catch (e) {
-          console.error('Failed to parse note:', e)
-        }
-      }
-    })
-  }
+  ttsStore.cnote.title = note.label
+  ttsStore.cnote.destTitle = note.label
+  ttsStore.cnote.lastPath = note.path
+  ttsStore.addRecentFile(note.path, note.label)
+  ttsStore.setLastEditNote()
+  // 文件内容由 MarkdownEditor 的 notePath watcher 加载
 }
 
 // 移除星标

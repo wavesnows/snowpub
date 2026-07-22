@@ -6,6 +6,13 @@ import { autoUpdater } from "electron-updater";
 
 import logger from "../utils/log";
 import os from 'os';
+import {
+  getAccessToken, invalidateToken,
+  uploadArticleImage, addImageMaterial, getImageMaterialList, deleteMaterial, addTempMedia,
+  addDraft, updateDraft, getDraftList, getDraft, deleteDraft,
+  publishDraft, getPublishStatus,
+  type WechatConfig,
+} from '../utils/wechat'
 const pty = require('node-pty');
 
 
@@ -101,7 +108,7 @@ async function createWindow() {
     minWidth: 900,
     minHeight: 600,
 
-    title: "Snowote",
+    title: "snowpub",
     icon: join(ROOT_PATH.public, "favicon.ico"),
     // useContentSize: true,
     frame: false,
@@ -155,6 +162,13 @@ async function createWindow() {
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith("https:")) shell.openExternal(url);
     return { action: "deny" };
+  });
+
+  // 防止内容链接（如预览中的 markdown 链接）把主窗口导航走，导致编辑会话丢失
+  win.webContents.on("will-navigate", (event, url) => {
+    if (url === win.webContents.getURL()) return; // 允许同源刷新/锚点
+    event.preventDefault();
+    if (url.startsWith("https:") || url.startsWith("http:")) shell.openExternal(url);
   });
 }
 
@@ -384,4 +398,139 @@ autoUpdater.on('error', (err) => {
 
 ipcMain.handle('updater:download', () => autoUpdater.downloadUpdate());
 ipcMain.handle('updater:install', () => autoUpdater.quitAndInstall(false, true));
+
+// ── WeChat Official Account ───────────────────────────────────────────────────
+// AppID/AppSecret persisted via electron-store (injected through renderer config),
+// access_token cached in electron/utils/wechat.ts.
+
+function readWechatConfig(): WechatConfig {
+  return {
+    appId: windowStateStore.get('wechat.appId', '') as string,
+    appSecret: windowStateStore.get('wechat.appSecret', '') as string,
+  }
+}
+
+ipcMain.handle('wechat:test', async (_event, { appId, appSecret }: WechatConfig) => {
+  // Test connection with provided credentials without persisting them.
+  invalidateToken(appId)
+  try {
+    const token = await getAccessToken({ appId, appSecret })
+    return { ok: true, token: token.slice(0, 8) + '...' }
+  } catch (e: any) {
+    return { ok: false, errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:getConfig', () => {
+  return readWechatConfig()
+})
+
+ipcMain.handle('wechat:saveConfig', (_event, { appId, appSecret }: WechatConfig) => {
+  windowStateStore.set('wechat.appId', appId || '')
+  windowStateStore.set('wechat.appSecret', appSecret || '')
+  // Invalidate cached token when credentials change
+  invalidateToken(appId)
+  return { ok: true }
+})
+
+ipcMain.handle('wechat:uploadArticleImage', async (_event, filePath: string) => {
+  try {
+    return await uploadArticleImage(readWechatConfig(), filePath)
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:addImageMaterial', async (_event, filePath: string) => {
+  try {
+    return await addImageMaterial(readWechatConfig(), filePath)
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:addTempMedia', async (_event, filePath: string) => {
+  try {
+    return await addTempMedia(readWechatConfig(), filePath)
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:getImageMaterialList', async (_event, offset = 0, count = 20) => {
+  try {
+    return await getImageMaterialList(readWechatConfig(), offset, count)
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:deleteMaterial', async (_event, mediaId: string) => {
+  try {
+    await deleteMaterial(readWechatConfig(), mediaId)
+    return { ok: true }
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:addDraft', async (_event, article: any) => {
+  try {
+    const mediaId = await addDraft(readWechatConfig(), article)
+    return { ok: true, media_id: mediaId }
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:updateDraft', async (_event, mediaId: string, index: number, article: any) => {
+  try {
+    await updateDraft(readWechatConfig(), mediaId, index, article)
+    return { ok: true }
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:getDraftList', async (_event, offset = 0, count = 20) => {
+  try {
+    return await getDraftList(readWechatConfig(), offset, count)
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:getDraft', async (_event, mediaId: string) => {
+  try {
+    return await getDraft(readWechatConfig(), mediaId)
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:deleteDraft', async (_event, mediaId: string) => {
+  try {
+    await deleteDraft(readWechatConfig(), mediaId)
+    return { ok: true }
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:publish', async (_event, mediaId: string) => {
+  try {
+    const publishId = await publishDraft(readWechatConfig(), mediaId)
+    return { ok: true, publish_id: publishId }
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
+
+ipcMain.handle('wechat:getPublishStatus', async (_event, publishId: string) => {
+  try {
+    return await getPublishStatus(readWechatConfig(), publishId)
+  } catch (e: any) {
+    return { errcode: e.errcode, errmsg: e.errmsg || e.message }
+  }
+})
 

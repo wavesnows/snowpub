@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="300 120 760 520" width="760" height="520">
+  <!-- Snowpub 品牌图形标：钢笔尖 → 虚线轨迹 → 纸飞机（无背景无文字，用于页头/关于页） -->
+
+  <!-- 钢笔尖（笔尖朝右上） -->
+  <g transform="translate(400,520) rotate(-40)">
+    <path d="M 96,0
+             C 60,-8 30,-28 8,-52
+             C -20,-80 -52,-88 -72,-84
+             L -72,84
+             C -52,88 -20,80 8,52
+             C 30,28 60,8 96,0 Z"
+          fill="#1A3C34"/>
+    <!-- 中缝 -->
+    <path d="M 88,0 L 6,0" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"/>
+    <!-- 呼吸孔 -->
+    <circle cx="-6" cy="0" r="11" fill="#FFFFFF"/>
+  </g>
+
+  <!-- 飞行轨迹（虚线弧） -->
+  <path d="M 545,455 Q 660,320 800,262"
+        fill="none" stroke="#4CC47C" stroke-width="9"
+        stroke-linecap="round" stroke-dasharray="2 26"/>
+
+  <!-- 纸飞机（朝右微上扬） -->
+  <g transform="translate(880,235) rotate(-12)">
+    <!-- 上翼 -->
+    <path d="M 150,0 L -125,-82 L -52,-4 Z" fill="#07C160"/>
+    <!-- 下翼（深色折面） -->
+    <path d="M 150,0 L -52,-4 L -125,82 Z" fill="#04954B"/>
+    <!-- 尾部小折面 -->
+    <path d="M -52,-4 L -125,82 L -78,10 Z" fill="#067A3E"/>
+  </g>
+</svg>

@@ -8,7 +8,7 @@
         </el-button>
       </el-tooltip>
       <el-tooltip class="box-item" :content="t('toolbar.gitSync')" placement="top-start">
-        <el-dropdown @command="handleGit" v-show="isInGitRepo && ttsStore.gitAvailable">
+        <el-dropdown @command="handleGit" v-show="currentNotebookIsGit && ttsStore.gitAvailable">
           <el-button type="success" size="small" circle class="circle-btn">
             <el-icon><Suitcase /></el-icon>
           </el-button>
@@ -41,10 +41,10 @@
         <h3>{{ t('settings.title') }}</h3>
       </template>
       <template #default>
-        <el-tabs tab-position="left" style="height: 100%" class="demo-tabs">
+        <el-tabs v-model="settingsActiveTab" :key="locale" tab-position="left" style="height: 100%" class="demo-tabs">
 
           <!-- Tab 1: 笔记本 -->
-          <el-tab-pane :label="t('settings.notebookTab')">
+          <el-tab-pane :label="t('settings.notebookTab')" name="notebook">
             <el-form label-width="120px" label-position="top">
               <el-form-item :label="t('settings.currentNotebook')">
                 <el-select v-model="settings.currentbook" :placeholder="t('settings.currentNotebook')" value-key="value" @change="saveHander">
@@ -85,7 +85,7 @@
           </el-tab-pane>
 
           <!-- Tab 2: 外观 -->
-          <el-tab-pane :label="t('settings.appearanceTab')">
+          <el-tab-pane :label="t('settings.appearanceTab')" name="appearance">
             <el-form label-width="120px" label-position="top">
               <el-form-item :label="t('settings.languageLabel')">
                 <el-select v-model="config.language" @change="changeLanguage">
@@ -102,11 +102,17 @@
                   <el-option :label="t('settings.themeRed')" value="red" />
                 </el-select>
               </el-form-item>
+              <el-form-item :label="t('settings.lineWrap')">
+                <el-switch
+                  :model-value="ttsStore.mdEditor.lineWrap"
+                  @change="(v: boolean) => ttsStore.setLineWrap(v)"
+                />
+              </el-form-item>
             </el-form>
           </el-tab-pane>
 
           <!-- Tab 3: 同步 -->
-          <el-tab-pane :label="t('settings.remoteSetting')">
+          <el-tab-pane :label="t('settings.remoteSetting')" name="sync">
             <el-alert v-if="!ttsStore.gitAvailable" type="warning" :closable="false" style="margin-bottom: 16px;">
               <template #title>{{ t('settings.gitNotFound') }}</template>
               <template #default>
@@ -210,12 +216,55 @@
             </el-form>
           </el-tab-pane>
 
-          <!-- Tab 4: 关于 -->
-          <el-tab-pane :label="t('help.about')">
+          <!-- Tab 4: 公众号 -->
+          <el-tab-pane :label="t('wechat.tabName')" name="wechat">
+            <div style="-webkit-app-region: no-drag">
+              <el-alert type="info" :closable="false" style="margin-bottom: 16px;">
+                <template #title>{{ t('wechat.configHint') }}</template>
+              </el-alert>
+              <el-form :model="wechatForm" label-width="120px" label-position="top">
+                <el-form-item :label="t('wechat.appId')">
+                  <el-input v-model="wechatForm.appId" :placeholder="t('wechat.appIdPlaceholder')" />
+                </el-form-item>
+                <el-form-item :label="t('wechat.appSecret')">
+                  <el-input v-model="wechatForm.appSecret" type="password" show-password :placeholder="t('wechat.appSecretPlaceholder')" />
+                </el-form-item>
+                <el-form-item :label="t('wechat.defaultAuthor')">
+                  <el-input
+                    :model-value="ttsStore.config.wechat.defaultAuthor"
+                    :placeholder="t('wechat.defaultAuthorPlaceholder')"
+                    @change="(v: string) => ttsStore.setDefaultAuthor(v.trim())"
+                  />
+                </el-form-item>
+                <el-form-item>
+                  <div style="display:flex; gap:8px; width:100%;">
+                    <el-button type="primary" @click="saveWechatConfig" :disabled="!wechatForm.appId || !wechatForm.appSecret">
+                      {{ t('wechat.saveConfig') }}
+                    </el-button>
+                    <el-button @click="testWechatConnection" :loading="wechatTesting" :disabled="!wechatForm.appId || !wechatForm.appSecret">
+                      {{ wechatTesting ? t('wechat.testing') : t('wechat.testConnection') }}
+                    </el-button>
+                    <el-button link type="primary" @click="openWechatConsole">{{ t('wechat.openConsole') }}</el-button>
+                  </div>
+                </el-form-item>
+                <el-form-item :label="t('settings.mdPreviewTheme') + ' (' + t('wechat.tabName') + ')'">
+                  <el-select :model-value="ttsStore.wechatTheme" @change="(v: string) => ttsStore.setWechatTheme(v)" style="width: 200px;">
+                    <el-option :label="t('wechat.themeGreen')" value="wechat-green" />
+                    <el-option :label="t('wechat.themeBlack')" value="wechat-black" />
+                    <el-option :label="t('wechat.themeOrange')" value="wechat-orange" />
+                    <el-option :label="t('wechat.themeDefault')" value="wechat-default" />
+                  </el-select>
+                </el-form-item>
+              </el-form>
+            </div>
+          </el-tab-pane>
+
+          <!-- Tab 5: 关于 -->
+          <el-tab-pane :label="t('help.about')" name="about">
             <div class="about-tab" style="-webkit-app-region: no-drag">
               <div class="about-tab-header">
-                <el-icon :size="48" color="#409eff"><Document /></el-icon>
-                <div class="about-tab-name">snowote <span class="about-tab-cn">雪记</span></div>
+                <img src="../../assets/brand/logo-mark.svg" alt="Snowpub" class="about-brand-mark" />
+                <div class="about-tab-name">Snowpub</div>
                 <div class="about-tab-version">v{{ appVersion }}</div>
               </div>
               <p class="about-tab-desc">{{ t('help.aboutDesc') }}</p>
@@ -288,7 +337,7 @@
 
 <script lang="ts" setup>
   import { ref, computed, onMounted } from 'vue'
-  import { Setting, Plus, Download, Upload, Suitcase, Document } from '@element-plus/icons-vue'
+  import { Setting, Plus, Download, Upload, Suitcase } from '@element-plus/icons-vue'
   import { ElMessageBox, ElMessage } from 'element-plus'
   import { useTtsStore, Tree } from "@/store/store";
   import { storeToRefs } from "pinia";
@@ -299,21 +348,55 @@
   import defaultConf from "@/global/defaultConf";
   import { ipcRenderer } from 'electron';
   import { useI18n } from 'vue-i18n';
-  import { isFileInGitRepo } from '@/libs/gitHistory';
 
   const { t, locale } = useI18n();
   const formLabelWidth = '140px';
   const appVersion = ref('')
   const showDonateDialog = ref(false)
+
+  // ── WeChat Official Account settings ──
+  const wechatForm = ref({ appId: '', appSecret: '' })
+  const wechatTesting = ref(false)
+
   onMounted(async () => {
     appVersion.value = await ipcRenderer.invoke('app:version')
+    // Preload WeChat config into local form
+    await ttsStore.loadWechatConfig()
+    wechatForm.value.appId = ttsStore.config.wechat.appId
+    wechatForm.value.appSecret = ttsStore.config.wechat.appSecret
   })
+
+  async function saveWechatConfig() {
+    await ttsStore.saveWechatConfig(wechatForm.value.appId.trim(), wechatForm.value.appSecret.trim())
+    ElMessage({ message: t('settings.saveSuccess'), type: 'success' })
+  }
+
+  async function testWechatConnection() {
+    wechatTesting.value = true
+    try {
+      const result = await ttsStore.testWechatConnection(wechatForm.value.appId.trim(), wechatForm.value.appSecret.trim())
+      if (result?.ok) {
+        ElMessage({ message: t('wechat.testSuccess'), type: 'success' })
+      } else {
+        ElMessage({ message: t('wechat.testFailed', { msg: result?.errmsg || result?.errcode || '' }), type: 'error' })
+      }
+    } finally {
+      wechatTesting.value = false
+    }
+  }
+
+  function openWechatConsole() {
+    const { shell } = require('electron')
+    shell.openExternal('https://mp.weixin.qq.com/')
+  }
+
   function openGithub() {
     const { shell } = require('electron')
-    shell.openExternal('https://github.com/wavesnows/snowote')
+    shell.openExternal('https://github.com/wavesnows/snowpub')
   }
   const dialogFormVisible = ref(false)
   const addDialogTab = ref('local')
+  const settingsActiveTab = ref('notebook')
   const rootFolderName = ref('')
   const dialogCloneRepoName = ref('')
   const dialogCloning = ref(false)
@@ -473,6 +556,11 @@
   }
 
   function onDrawerOpen() {
+    // 外部请求定位到指定 tab（如发布按钮引导到微信配置）
+    if (ttsStore.config.settingsTab) {
+      settingsActiveTab.value = ttsStore.config.settingsTab;
+      ttsStore.config.settingsTab = '';
+    }
     buildNotebookOptions();
   }
 
@@ -484,12 +572,6 @@
   const currentNotebookIsGit = computed(() => {
     const gitPath = join(ttsStore.notebook.currentPath, '.git');
     return fs.existsSync(gitPath);
-  });
-
-  const isInGitRepo = computed(() => {
-    const lastPath = cnote.value.lastPath;
-    if (!lastPath) return false;
-    return isFileInGitRepo(lastPath);
   });
 
   function openGitInstallPage() {
@@ -737,6 +819,10 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
+}
+
+.about-brand-mark {
+  width: 76px;
 }
 
 .about-tab-name {

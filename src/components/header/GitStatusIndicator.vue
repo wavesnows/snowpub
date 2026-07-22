@@ -1,5 +1,5 @@
 <template>
-  <div class="git-status-indicator">
+  <div v-if="showIndicator" class="git-status-indicator">
     <el-button
       size="small"
       circle
@@ -18,25 +18,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { useTtsStore } from '@/store/store';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { Upload } from '@element-plus/icons-vue';
 import { gitHubPush } from '@/libs/github';
-import { isFileInGitRepo } from '@/libs/gitHistory';
+import fs from 'fs';
+import { join } from 'path';
 
 const { t } = useI18n();
 const ttsStore = useTtsStore();
-const { gitStatus, cnote } = storeToRefs(ttsStore);
+const { gitStatus } = storeToRefs(ttsStore);
 
 
-// Show indicator when current note is inside a git repo and git is available
+// 仅当当前笔记本本身是 git 仓库且 git 可用时显示（与侧栏 git 同步按钮同一口径）
 const showIndicator = computed(() => {
   if (!ttsStore.gitAvailable) return false;
-  const lastPath = cnote.value?.lastPath;
-  if (!lastPath) return false;
-  return isFileInGitRepo(lastPath);
+  return fs.existsSync(join(ttsStore.notebook.currentPath, '.git'));
 });
 
 // Check if there are any changes

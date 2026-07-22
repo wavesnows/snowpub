@@ -1,6 +1,5 @@
 // @/store/firstStore.js
 import { defineStore } from "pinia";
-import EditorJS from "@editorjs/editorjs";
 import {join} from "path";
 import type Node from 'element-plus/es/components/tree/src/model/node'
 import DFConf from "@/global/defaultConf";
@@ -22,8 +21,6 @@ export interface Tree {
   path?: any
   children?: Tree[]
   }
-
-export var editorInstance:EditorJS
 
 const store = defaultStore
 
@@ -111,13 +108,13 @@ export const useTtsStore = defineStore(DFConf.appName, {
         curentData:<Tree>{}
       },
       folderName:"",
-      editerData:store.get("editerData"),
       editerflag:false,
       readOnly:false,
       editor:{
 
       },
-      editorInstance:<EditorJS> editorInstance,
+      // 递增触发器：历史版本恢复后通知 MarkdownEditor 重新加载当前文件
+      noteReloadTrigger: 0,
       page: {
         asideIndex: "1",
         tsideIndex:"1",
@@ -130,6 +127,8 @@ export const useTtsStore = defineStore(DFConf.appName, {
       //  store.set("defaultStorePath",this.notestore.currentStore);
         defaultNotePath: store.get("defaultNotePath") || defaultNotebookPath,
         drawer:false,
+        // 请求设置抽屉打开时定位到指定 tab（notebook/appearance/sync/wechat/about），空串表示默认
+        settingsTab: '',
         githubEnable:false,
         githubRepoName:store.get("GithubRepoName") || "",
         githubUsername:store.get("GithubUsername") || "",
@@ -140,6 +139,17 @@ export const useTtsStore = defineStore(DFConf.appName, {
         formConfigJson: store.get("FormConfig"),
         updateNotification: store.get("updateNotification"),
         language: store.get("language") || 'en_US',
+        // WeChat Official Account configuration (AppID/AppSecret stored in electron-store
+        // via main-process IPC; renderer only caches them for UI).
+        wechat: {
+          appId: store.get("wechat.appId") || "",
+          appSecret: store.get("wechat.appSecret") || "",
+          // 默认封面（内置品牌图）上传后的永久素材缓存，避免重复上传
+          defaultCoverMediaId: store.get("wechat.defaultCoverMediaId") || "",
+          defaultCoverUrl: store.get("wechat.defaultCoverUrl") || "",
+          // 默认作者：新建笔记 front matter 与发布对话框的作者兜底
+          defaultAuthor: store.get("wechat.defaultAuthor") || "",
+        },
       },
       settings: {
         currentStore: store.get('currentStore') || defaultDir,
@@ -165,6 +175,8 @@ export const useTtsStore = defineStore(DFConf.appName, {
       mdMode: 'edit' as 'edit' | 'preview',
       mdTheme: (store.get('mdTheme') as string) || 'teal',
       mdCopyTrigger: 0,
+      mdPreviewSplit: 'single' as 'single' | 'wechat', // preview layout: single (default) | wechat (dual with wechat preview)
+      wechatTheme: (store.get('wechatTheme') as string) || 'wechat-green', // wechat preview theme
       gitAvailable: false,
       gitStatus: {
         hasUncommitted: false,
@@ -186,12 +198,6 @@ export const useTtsStore = defineStore(DFConf.appName, {
         message: '',
         timeout: null as any,
       },
-      autoSave: {
-        enabled: true,
-        interval: 30000, // 30 seconds
-        timer: null as any,
-        hasUnsavedChanges: false,
-      },
       treeRefresh: {
         timeout: null as any,
         debounceMs: 500, // 500ms debounce for tree refresh
@@ -206,10 +212,32 @@ export const useTtsStore = defineStore(DFConf.appName, {
         bsideWidth: 200, // synced from Bside for terminal positioning
       },
       mdEditor: {
-        lineWrap: true,
+        lineWrap: (store.get("mdEditor.lineWrap") as boolean) ?? true,
       },
       showHiddenFiles: false,
       flatFileList: [] as string[],
+      // ── WeChat publishing runtime state ────────────────────────────────────
+      wechatPublish: {
+        // 草稿同步
+        drafts: [] as any[],
+        draftLoading: false,
+        // 素材库（封面图候选）
+        materials: [] as any[],
+        materialLoading: false,
+        materialTotal: 0,
+        // 当前文章发布状态
+        currentMediaId: '', // 已上传到公众号草稿箱的 media_id
+        publishStatus: 'idle' as 'idle' | 'uploading' | 'publishing' | 'success' | 'error',
+        publishMessage: '',
+        publishId: '', // 发布任务 ID，用于轮询
+        // 封面图
+        coverMediaId: '',
+        coverUrl: '',
+        // 摘要（digest），不填则由微信自动截取正文前 54 字
+        digest: '',
+        author: '',
+        articleUrl: '', // 已发布后的文章 URL
+      },
     };
   },
   // 定义getters，类似于computed，具有缓存功能
@@ -219,7 +247,6 @@ export const useTtsStore = defineStore(DFConf.appName, {
     setLastEditNote(){
       safeSet("lastPath", this.cnote.lastPath);
       safeSet("title", this.cnote.title);
-      safeSet('editerData', this.editerData);
       if (this.treeMenu.expandedKeys) {
         store.set('expandedKeys', this.treeMenu.expandedKeys);
       }
@@ -406,19 +433,7 @@ export const useTtsStore = defineStore(DFConf.appName, {
       const label = fileName.replace(/\.(json|md)$/, '');
       this.cnote.title = label;
       this.cnote.destTitle = label;
-      // Load JSON content for EditorJS
-      if (!nextPath.endsWith('.json') || this.showHiddenFiles) {
-        // Non-JSON or hidden-files mode: CodeMirror handles loading via its own watcher
-      } else {
-        try {
-          const data = fs.readFileSync(nextPath, 'utf-8').trim();
-          this.editerData = data
-            ? JSON.parse(data)
-            : { time: Date.now(), blocks: [], version: '2.26.5' };
-        } catch (e) {
-          console.error('navigateNote: failed to load JSON', e);
-        }
-      }
+      // 文件内容由 MarkdownEditor 的 notePath watcher 加载
       this.setLastEditNote();
       this.addRecentFile(nextPath, label);
     },
@@ -510,25 +525,9 @@ export const useTtsStore = defineStore(DFConf.appName, {
         log('Got content:', content !== null ? `length: ${content.length}` : 'null');
 
         if (content !== null) {
-          // Handle empty file
-          if (content.length === 0 || content.trim().length === 0) {
-            log('File is empty in this commit');
-            this.history.previewData = {
-              time: Date.now(),
-              blocks: [],
-              version: "2.26.5"
-            };
-            this.history.selectedCommit = commit;
-          } else if (filePath.endsWith('.md')) {
-            // md 文件直接存原始内容，不做 JSON 解析
-            this.history.previewData = { _markdown: content, time: Date.now(), blocks: [], version: "2.26.5" };
-            this.history.selectedCommit = commit;
-          } else {
-            const parsed = JSON.parse(content);
-            log('Parsed data:', parsed);
-            this.history.previewData = parsed;
-            this.history.selectedCommit = commit;
-          }
+          // 所有文件（.md / 旧版 .json）统一按纯文本预览，不做 JSON 解析
+          this.history.previewData = { _markdown: content, time: Date.now(), blocks: [], version: "2.26.5" };
+          this.history.selectedCommit = commit;
         } else {
           console.error('No content returned from git - file may not exist in this commit');
           throw new Error('File does not exist in this commit');
@@ -539,11 +538,6 @@ export const useTtsStore = defineStore(DFConf.appName, {
           ElMessage({
             type: 'warning',
             message: 'This file does not exist in the selected commit',
-          });
-        } else if (error instanceof SyntaxError) {
-          ElMessage({
-            type: 'error',
-            message: 'Failed to parse file content (invalid JSON)',
           });
         }
         throw error;
@@ -561,15 +555,8 @@ export const useTtsStore = defineStore(DFConf.appName, {
         const success = await restoreFileToCommit(filePath, repoPath, commit.hash);
 
         if (success) {
-          // Reload note content
-          const content = fs.readFileSync(filePath, 'utf-8');
-          this.editerData = JSON.parse(content);
-
-          // Update editor
-          if (this.editorInstance) {
-            await this.editorInstance.render(this.editerData);
-          }
-
+          // 触发 MarkdownEditor 重新从磁盘加载当前文件
+          this.noteReloadTrigger++;
           return true;
         }
 
@@ -680,47 +667,10 @@ export const useTtsStore = defineStore(DFConf.appName, {
           this.saveStatus.message = '';
         }, 3000);
       }
-
-      // Clear unsaved changes flag on successful save
-      if (status === 'saved') {
-        this.autoSave.hasUnsavedChanges = false;
-      }
-    },
-
-    // Mark content as changed (needs save)
-    markContentChanged() {
-      this.autoSave.hasUnsavedChanges = true;
-    },
-
-    // Start auto-save timer
-    startAutoSave() {
-      if (this.autoSave.timer) {
-        clearInterval(this.autoSave.timer);
-      }
-
-      if (this.autoSave.enabled) {
-        this.autoSave.timer = setInterval(() => {
-          if (this.autoSave.hasUnsavedChanges && this.cnote.lastPath) {
-            log('Auto-saving...');
-            // Trigger save through editor
-            const saveEvent = new CustomEvent('auto-save');
-            window.dispatchEvent(saveEvent);
-          }
-        }, this.autoSave.interval);
-      }
-    },
-
-    // Stop auto-save timer
-    stopAutoSave() {
-      if (this.autoSave.timer) {
-        clearInterval(this.autoSave.timer);
-        this.autoSave.timer = null;
-      }
     },
 
     // Clear all pending timers (call on app/component unmount)
     clearAllTimers() {
-      this.stopAutoSave();
       if (this.treeRefresh.timeout) {
         clearTimeout(this.treeRefresh.timeout);
         this.treeRefresh.timeout = null;
@@ -742,6 +692,12 @@ export const useTtsStore = defineStore(DFConf.appName, {
     // Open help dialog
     openHelpDialog() {
       this.helpDialog.show = true;
+    },
+
+    // 打开设置抽屉，可选定位到指定 tab
+    openSettings(tab?: string) {
+      this.config.settingsTab = tab || '';
+      this.config.drawer = true;
     },
 
     // Close help dialog
@@ -788,8 +744,132 @@ export const useTtsStore = defineStore(DFConf.appName, {
       this.mdTheme = theme;
       store.set('mdTheme', theme);
     },
+    setWechatTheme(theme: string) {
+      this.wechatTheme = theme;
+      store.set('wechatTheme', theme);
+    },
+    setMdPreviewSplit(mode: 'single' | 'wechat') {
+      this.mdPreviewSplit = mode;
+    },
+    setLineWrap(v: boolean) {
+      this.mdEditor.lineWrap = v;
+      safeSet('mdEditor.lineWrap', v);
+    },
     triggerMdCopy() {
       this.mdCopyTrigger++;
+    },
+
+    // ── WeChat publishing actions ──────────────────────────────────────────────
+    async loadWechatConfig() {
+      try {
+        const cfg = await ipcRenderer.invoke('wechat:getConfig')
+        this.config.wechat.appId = cfg?.appId || ''
+        this.config.wechat.appSecret = cfg?.appSecret || ''
+      } catch (e) {
+        console.error('loadWechatConfig failed', e)
+      }
+    },
+    async saveWechatConfig(appId: string, appSecret: string) {
+      await ipcRenderer.invoke('wechat:saveConfig', { appId, appSecret })
+      this.config.wechat.appId = appId
+      this.config.wechat.appSecret = appSecret
+    },
+    async testWechatConnection(appId: string, appSecret: string) {
+      return await ipcRenderer.invoke('wechat:test', { appId, appSecret })
+    },
+    setDefaultAuthor(author: string) {
+      this.config.wechat.defaultAuthor = author
+      safeSet('wechat.defaultAuthor', author)
+    },
+    async uploadArticleImage(filePath: string) {
+      return await ipcRenderer.invoke('wechat:uploadArticleImage', filePath)
+    },
+    async addImageMaterial(filePath: string) {
+      return await ipcRenderer.invoke('wechat:addImageMaterial', filePath)
+    },
+
+    // 获取默认封面（内置品牌图）的 media_id；未上传过则先上传并缓存
+    async ensureDefaultCover(): Promise<{ media_id: string; url: string } | null> {
+      if (this.config.wechat.defaultCoverMediaId) {
+        return {
+          media_id: this.config.wechat.defaultCoverMediaId,
+          url: this.config.wechat.defaultCoverUrl,
+        };
+      }
+      try {
+        const { ensureDefaultCoverFile } = await import('@/libs/defaultCover');
+        const result = await this.addImageMaterial(ensureDefaultCoverFile());
+        if (result && result.media_id) {
+          this.config.wechat.defaultCoverMediaId = result.media_id;
+          this.config.wechat.defaultCoverUrl = result.url || '';
+          safeSet('wechat.defaultCoverMediaId', result.media_id);
+          safeSet('wechat.defaultCoverUrl', result.url || '');
+          return { media_id: result.media_id, url: result.url || '' };
+        }
+        return null;
+      } catch (e) {
+        console.error('ensureDefaultCover failed:', e);
+        return null;
+      }
+    },
+    async loadImageMaterials(offset = 0, count = 20) {
+      this.wechatPublish.materialLoading = true
+      try {
+        const result = await ipcRenderer.invoke('wechat:getImageMaterialList', offset, count)
+        if (result.errcode) {
+          ElMessage.error(`加载素材失败: ${result.errmsg || result.errcode}`)
+          return
+        }
+        this.wechatPublish.materials = result.item || []
+        this.wechatPublish.materialTotal = result.total_count || 0
+      } finally {
+        this.wechatPublish.materialLoading = false
+      }
+    },
+    async deleteImageMaterial(mediaId: string) {
+      return await ipcRenderer.invoke('wechat:deleteMaterial', mediaId)
+    },
+    async loadWechatDrafts(offset = 0, count = 20) {
+      this.wechatPublish.draftLoading = true
+      try {
+        const result = await ipcRenderer.invoke('wechat:getDraftList', offset, count)
+        if (result.errcode) {
+          ElMessage.error(`加载草稿失败: ${result.errmsg || result.errcode}`)
+          return
+        }
+        this.wechatPublish.drafts = result.item || []
+      } finally {
+        this.wechatPublish.draftLoading = false
+      }
+    },
+    async addWechatDraft(article: any) {
+      return await ipcRenderer.invoke('wechat:addDraft', article)
+    },
+    async getWechatDraft(mediaId: string) {
+      return await ipcRenderer.invoke('wechat:getDraft', mediaId)
+    },
+    async updateWechatDraft(mediaId: string, index: number, article: any) {
+      return await ipcRenderer.invoke('wechat:updateDraft', mediaId, index, article)
+    },
+    async deleteWechatDraft(mediaId: string) {
+      return await ipcRenderer.invoke('wechat:deleteDraft', mediaId)
+    },
+    async publishWechatDraft(mediaId: string) {
+      return await ipcRenderer.invoke('wechat:publish', mediaId)
+    },
+    async getWechatPublishStatus(publishId: string) {
+      return await ipcRenderer.invoke('wechat:getPublishStatus', publishId)
+    },
+    setPublishStatus(status: 'idle' | 'uploading' | 'publishing' | 'success' | 'error', message = '') {
+      this.wechatPublish.publishStatus = status
+      this.wechatPublish.publishMessage = message
+    },
+    resetPublishState() {
+      this.wechatPublish.currentMediaId = ''
+      this.wechatPublish.publishId = ''
+      this.wechatPublish.articleUrl = ''
+      this.wechatPublish.publishStatus = 'idle'
+      this.wechatPublish.publishMessage = ''
     },
 
     // Add a new root store directory

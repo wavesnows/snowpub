@@ -73,10 +73,6 @@
              <a class="icon-add" >⚙︎</a>
               <template #dropdown>
               <el-dropdown-menu class="tree-context-menu">
-                <el-dropdown-item v-if="node.data.isFolder" :command="{type:'file', data:data}">
-                  <el-icon><Document /></el-icon>
-                  <span>{{ t('fileTree.createFile') }}</span>
-                </el-dropdown-item>
                 <el-dropdown-item v-if="node.data.isFolder" :command="{type:'mdfile', data:data}">
                   <el-icon><Document /></el-icon>
                   <span>{{ t('fileTree.createMdFile') }}</span>
@@ -159,7 +155,7 @@ import Node from 'element-plus/es/components/tree/src/model/node'
 import {ElTree, ElMessage,ElMessageBox, ElPopconfirm} from 'element-plus'
 import { Search, InfoFilled, Star, StarFilled, Document, Folder, FolderOpened, Delete, Position, RemoveFilled } from "@element-plus/icons-vue"
 import {getNoteLabel} from "@/libs/noteUtil"
-import { useTtsStore, editorInstance, Tree } from "@/store/store"
+import { useTtsStore, Tree } from "@/store/store"
 import { log, dir } from "@/libs/logger"
 import { readDir,readNotes} from "@/libs/fileHandler"
 import {updateTreeMenu} from "@/libs/treeMenu"
@@ -168,7 +164,7 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const ttsStore = useTtsStore();
-var {editerData,inputs,cnote ,treeMenu} = storeToRefs(ttsStore);
+var {inputs,cnote ,treeMenu} = storeToRefs(ttsStore);
 
 const filterText = ref('')
 const treeRef = ref<InstanceType<typeof ElTree>>()
@@ -375,9 +371,6 @@ const handleCommand = (command: any) => {
     ttsStore.treeMenu.treeData = command.data as Tree;
     ttsStore.treeMenu.node = command.node as Node;
     switch (command.type) {
-      case 'file':
-        append(command.data)
-        break;
       case 'mdfile':
         appendMd(command.data)
         break;
@@ -520,27 +513,19 @@ const addFolder = () =>{
     }
     data.children.push(newChild as Tree)
     ttsStore.inputs.notePath = path
-    fs.writeFileSync(path, '', 'utf8')
+    // 公众号笔记固定格式：front matter 元信息，发布时自动读取；作者取系统默认配置
+    const template = [
+      '---',
+      'title: ',
+      `author: ${ttsStore.config.wechat.defaultAuthor || ''}`,
+      `# digest: ${t('fileTree.tplDigestHint')}`,
+      `# cover: ./cover.png  ${t('fileTree.tplCoverHint')}`,
+      '---',
+      '',
+      ''
+    ].join('\n')
+    fs.writeFileSync(path, template, 'utf8')
   }
-
-  const append = (data: Tree) => {
-    let label:string = getNoteLabel();
-    let path:any = join(data.path,label+'.json')
-    const newChild:Tree = {label: label, path: path, isFolder:false, isLeaf: true}
-    if (!data.children) {
-      data.children = []
-    }
-    data.children.push(newChild as Tree)
-    ttsStore.inputs.notePath = path
-    // Create new file with valid EditorJS structure
-    const emptyEditorData = {
-      time: Date.now(),
-      blocks: [],
-      version: "2.26.5"
-    };
-    fs.writeFileSync(path, JSON.stringify(emptyEditorData, null, 2), 'utf8')
- // ttsStore.treeMenu.data.value = [...ttsStore.treeMenu.data.value]
-}
 
 const handleNodeClick = ((itemdata: Tree,node:Node) => {
     log('[FileTree] node click:', itemdata.path)
@@ -557,37 +542,8 @@ const handleNodeClick = ((itemdata: Tree,node:Node) => {
     ttsStore.treeMenu.currentNode = treeRef.value?.getCurrentNode()
     ttsStore.setLastEditNote()
     ttsStore.addRecentFile(itemdata.path, itemdata.label)
-
-    if (!itemdata.path.endsWith('.json') || ttsStore.showHiddenFiles) {
-      // Non-JSON files or when showHiddenFiles is on: use CodeMirror
-      return
-    }
-
-    fs.readFile(itemdata.path, 'utf8', (err:any, data:any) => {
-    if (err) {
-      console.error('Failed to read file:', err)
-      return
-    }
-    data = data.trim().replace('\n','')
-    if(data == "")
-    {
-      const emptyData = {
-        time: Date.now(),
-        blocks: [],
-        version: "2.26.5"
-      };
-      ttsStore.editerData = emptyData;
-    }
-    else{
-      try {
-        const jsonData = JSON.parse(data);
-        ttsStore.editerData = jsonData;
-      } catch (e) {
-        console.error('Failed to parse note JSON:', e)
-      }
-    }
-
-  })}
+    // 所有文件内容由 MarkdownEditor 的 notePath watcher 加载
+  }
   })
   </script>
 
