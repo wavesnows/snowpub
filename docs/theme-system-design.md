@@ -133,7 +133,7 @@ markdown → markdown-it → 裸 HTML → 塞进带 theme-* class 的离屏 DOM
 
 主题 JSON 是可导入的外部输入，必须限制攻击面：
 
-- **属性白名单**：仅允许上表示例出现的排版类属性（color/background/font-*/line-height/letter-spacing/text-align/padding/margin/border*/border-radius/text-decoration/list-style-type/width/max-width/vertical-align）。**显式排除** `position`、`float`、`display: flex/grid`（微信不支持且易翻车）
+- **属性白名单**：仅允许上表示例出现的排版类属性（color/background/font-*/line-height/letter-spacing/text-align/padding/margin/border*/border-radius/text-decoration/list-style-type/width/max-width/overflow-wrap/overflow-x/vertical-align）。**显式排除** `position`、`float`、`display: flex/grid`（微信不支持且易翻车）
 - **值消毒**：任何值含 `url(`、`expression(`、`javascript:` → 拒绝整个主题
 - 编译器对每个元素**强制补充**安全默认值，主题无法覆盖：`img` 永远有 `max-width:100%`
 

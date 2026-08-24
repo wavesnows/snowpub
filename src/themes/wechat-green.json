@@ -17,7 +17,8 @@
     "color": "${text}",
     "background": "#fff",
     "padding": "16px 18px",
-    "word-break": "break-word"
+    "word-break": "break-word",
+    "overflow-wrap": "break-word"
   },
   "elements": {
     "heading": {
@@ -79,6 +80,7 @@
       "background": "#f6f8fa",
       "padding": "12px",
       "border-radius": "4px",
+      "overflow-x": "auto",
       "font-size": "13px",
       "line-height": "1.5",
       "margin": "1em 0"

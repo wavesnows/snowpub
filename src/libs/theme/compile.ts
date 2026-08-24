@@ -19,6 +19,7 @@ const PROP_WHITELIST = new Set<string>([
   'margin', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom',
   'border', 'border-left', 'border-right', 'border-top', 'border-bottom', 'border-radius', 'border-collapse',
   'text-decoration', 'list-style-type', 'width', 'max-width', 'word-break', 'white-space',
+  'overflow-wrap', 'overflow-x',
 ])
 
 // 元素键全集（运行时校验未知键用）
