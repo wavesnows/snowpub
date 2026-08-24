@@ -1,6 +1,5 @@
 // 外链转脚注规则 + 脚注引用块构建
-// 迁移自 src/libs/wechatRender.ts:createWechatMd / buildStyledWechatHtml
-// 区别：样式不再硬编码，改由 CompiledTheme 提供；空样式不输出 style 属性
+// 样式由 CompiledTheme 提供；空样式不输出 style 属性
 import type MarkdownIt from 'markdown-it'
 import type { CompiledTheme } from './types'
 
