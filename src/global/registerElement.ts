@@ -29,6 +29,8 @@ import {
   ElPageHeader,
   ElDropdown,
   ElRadio,
+  ElRadioGroup,
+  ElRadioButton,
   ElScrollbar,
   ElTooltip,
   ElTabs
@@ -50,6 +52,8 @@ const components = [
   ElMenu,
   ElMenu.MenuItem,
   ElRadio,
+  ElRadioGroup,
+  ElRadioButton,
 
   ElInput,
   ElForm,

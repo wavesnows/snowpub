@@ -411,10 +411,20 @@ const zh = {
       confirmDeleteMaterial: '确定删除该素材？',
       materialDeleted: '素材已删除',
       copyImageUrl: '复制图片 URL',
+      // 图文（图片消息）
+      publishType: '类型',
+      typeArticle: '长文',
+      typeImagePost: '图文',
+      imageContent: '描述',
+      imageContentPlaceholder: '图文的文字描述（纯文本），显示在图片下方',
+      imageList: '图片（首张为封面）',
+      collectFromNote: '从笔记收集',
       // 错误
       needCover: '请先选择封面图',
       needTitle: '标题不能为空',
       needContent: '正文不能为空',
+      needImages: '请至少添加一张图片',
+      imageLimitReached: '最多 20 张图片',
     },
   };
 

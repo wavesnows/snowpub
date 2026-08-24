@@ -411,10 +411,20 @@ const en = {
       confirmDeleteMaterial: 'Delete this material?',
       materialDeleted: 'Material deleted',
       copyImageUrl: 'Copy image URL',
+      // Image post (newspic)
+      publishType: 'Type',
+      typeArticle: 'Article',
+      typeImagePost: 'Image post',
+      imageContent: 'Description',
+      imageContentPlaceholder: 'Plain-text description shown below the images',
+      imageList: 'Images (first is cover)',
+      collectFromNote: 'Collect from note',
       // Errors
       needCover: 'Please pick a cover image first',
       needTitle: 'Title cannot be empty',
       needContent: 'Content cannot be empty',
+      needImages: 'Add at least one image',
+      imageLimitReached: 'Up to 20 images',
     },
   };
 

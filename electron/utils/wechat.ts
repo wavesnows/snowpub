@@ -167,14 +167,19 @@ export async function deleteMaterial(cfg: WechatConfig, mediaId: string): Promis
 // ── 草稿 ────────────────────────────────────────────────────────────────
 
 export interface WechatArticle {
+  article_type?: 'news' | 'newspic' // 图文消息（默认）/ 图片消息
   title: string
   author?: string
-  digest?: string // 摘要，不填则默认取正文前 54 字
-  content: string // HTML 正文
-  content_source_url?: string // 原文链接
-  thumb_media_id: string // 封面图 media_id（必须先上传为永久素材）
+  digest?: string // 摘要，不填则默认取正文前 54 字（仅 news）
+  content: string // news: HTML 正文；newspic: 纯文本描述
+  content_source_url?: string // 原文链接（仅 news）
+  thumb_media_id?: string // 封面图 media_id（news 必填，必须是永久素材；newspic 首图即封面）
   need_open_comment?: 0 | 1
   only_fans_can_comment?: 0 | 1
+  // newspic 必填：图片列表（最多 20 张，均为永久素材 media_id）
+  image_info?: { image_list: Array<{ image_media_id: string }> }
+  // newspic 可选：封面裁剪
+  cover_info?: { crop_percent_list?: Array<{ ratio?: string; x1?: string; y1?: string; x2?: string; y2?: string }> }
 }
 
 /**
