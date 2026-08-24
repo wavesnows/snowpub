@@ -14,8 +14,10 @@
           <el-option :label="t('wechat.themeOrange')" value="wechat-orange" />
           <el-option :label="t('wechat.themeDefault')" value="wechat-default" />
         </el-select>
-        <el-tooltip :content="t('wechat.copyImageUrl')" placement="top">
-          <el-button size="small" @click="copyHtml">HTML</el-button>
+        <el-tooltip :content="t('tools.copyAll')" placement="top">
+          <el-button size="small" circle class="wx-tool-btn" @click="copyHtml">
+            <el-icon><CopyDocument /></el-icon>
+          </el-button>
         </el-tooltip>
       </div>
     </div>
@@ -42,6 +44,8 @@
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import MarkdownIt from 'markdown-it'
+import { ElMessage } from 'element-plus'
+import { CopyDocument } from '@element-plus/icons-vue'
 import { useTtsStore } from '@/store/store'
 import { stripFrontMatter } from '@/libs/frontMatter'
 import { extractArticle } from '@/libs/articleStructure'
@@ -137,6 +141,7 @@ async function copyHtml() {
     // Fallback for environments without ClipboardItem
     await navigator.clipboard.writeText(text)
   }
+  ElMessage({ message: t('tools.copyAll'), type: 'success', duration: 2000 })
 }
 
 onMounted(() => {})
@@ -171,6 +176,20 @@ onBeforeUnmount(() => {})
 .wx-toolbar-actions {
   display: flex;
   gap: 6px;
+  align-items: center;
+}
+
+/* 与全局工具栏 Tools.vue 的 .tool-btn 保持一致 */
+.wx-tool-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  min-width: 24px;
+  margin: 0 !important;
+}
+
+.wx-tool-btn .el-icon {
+  font-size: 14px;
 }
 
 .wechat-preview-scroll {
@@ -180,9 +199,10 @@ onBeforeUnmount(() => {})
   padding: 16px;
 }
 
-/* Preview card */
+/* Preview card — 注意不能在这里设 background：scoped 选择器带 [data-v] 后优先级
+   高于全局主题类（如 .theme-wechat-black），会把深色主题的背景锁死成白色。
+   白底由全局 wechat-preview.css 的 .wechat-preview 基础规则提供，主题可正常覆盖。 */
 .wechat-preview-scroll > .wechat-preview {
-  background: #fff;
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   max-width: 640px;
