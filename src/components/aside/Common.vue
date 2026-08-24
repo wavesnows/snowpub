@@ -23,6 +23,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { log } from '@/libs/logger'
 
 const value = ref<object>({
     value: 'demo',
