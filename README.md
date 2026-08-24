@@ -84,6 +84,21 @@ If snowpub is useful to you, consider buying me a coffee ☕
   </table>
 </div>
 
+## Customization Services
+
+Want a signature theme for your brand, or a feature built on top of snowpub? I take custom work:
+
+- **Theme customization** — your colors, typography, and layout, delivered as a drop-in theme
+- **Feature development** — batch publishing, asset workflows, and more, built as private modules on the open-source core
+- **Private deployment & maintenance** — annual plan with updates and priority support
+
+Scan the WeChat code below and mention **"custom"** in your note:
+
+<div align="center">
+  <img src="src/assets/wx.jpg" width="160" alt="WeChat" /><br/>
+  <sub><b>WeChat</b> · note "custom" when adding</sub>
+</div>
+
 ## License
 
 MIT © [wavesnows](LICENSE)
