@@ -7,6 +7,14 @@
     @open="onOpen"
   >
     <el-form label-position="top" v-loading="ttsStore.wechatPublish.publishStatus === 'uploading'">
+      <el-alert
+        v-if="ttsStore.config.wechat.publishBlocked"
+        type="warning"
+        :title="t('wechat.publishBlockedHint')"
+        :closable="false"
+        show-icon
+        class="blocked-alert"
+      />
       <el-form-item :label="t('wechat.publishType')">
         <el-radio-group v-model="form.type">
           <el-radio-button label="news">{{ t('wechat.typeArticle') }}</el-radio-button>
@@ -16,8 +24,14 @@
       <el-form-item :label="t('wechat.articleTitle')">
         <el-input v-model="form.title" :placeholder="t('wechat.articleTitle')" maxlength="64" show-word-limit />
       </el-form-item>
-      <!-- 长文（news）：作者 / 摘要 / 封面 -->
+      <!-- 长文（news）：封面 / 作者 / 摘要（封面紧跟标题：分享卡片三要素连着填） -->
       <template v-if="form.type === 'news'">
+        <el-form-item :label="t('wechat.coverImage')">
+          <CoverPicker
+            v-model="form.thumb_media_id"
+            v-model:url="form.coverUrl"
+          />
+        </el-form-item>
         <el-form-item :label="t('wechat.draftAuthor')">
           <el-input v-model="form.author" :placeholder="t('wechat.draftAuthor')" maxlength="32" />
         </el-form-item>
@@ -31,11 +45,19 @@
             show-word-limit
           />
         </el-form-item>
-        <el-form-item :label="t('wechat.coverImage')">
-          <CoverPicker
-            v-model="form.thumb_media_id"
-            v-model:url="form.coverUrl"
-          />
+        <el-form-item :label="t('wechat.sourceUrl')">
+          <el-input v-model="form.sourceUrl" :placeholder="t('wechat.sourceUrlPlaceholder')" />
+        </el-form-item>
+        <el-form-item>
+          <div class="comment-switches">
+            <el-checkbox v-model="form.needOpenComment" :true-label="1" :false-label="0">
+              {{ t('wechat.needOpenComment') }}
+            </el-checkbox>
+            <el-checkbox v-model="form.onlyFansCanComment" :true-label="1" :false-label="0" :disabled="!form.needOpenComment">
+              {{ t('wechat.onlyFansComment') }}
+            </el-checkbox>
+            <span class="comment-hint">{{ t('wechat.commentHint') }}</span>
+          </div>
         </el-form-item>
       </template>
       <!-- 图文（newspic）：纯文本描述 + 图片列表（首图即封面） -->
@@ -74,6 +96,10 @@
       {{ statusText }}
     </div>
 
+    <div class="original-hint">
+      {{ t('wechat.originalHint') }}
+    </div>
+
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="openDraftList">{{ t('wechat.draftListTitle') }}</el-button>
@@ -90,7 +116,7 @@
           type="success"
           @click="publish"
           :loading="ttsStore.wechatPublish.publishStatus === 'publishing'"
-          :disabled="!ttsStore.wechatPublish.currentMediaId"
+          :disabled="!ttsStore.wechatPublish.currentMediaId || ttsStore.config.wechat.publishBlocked"
         >
           {{ t('wechat.publishDraftBtn') }}
         </el-button>
@@ -114,6 +140,7 @@ import { ipcRenderer } from 'electron'
 import { useTtsStore } from '@/store/store'
 import { useI18n } from 'vue-i18n'
 import { parseFrontMatter, stripFrontMatter } from '@/libs/frontMatter'
+import { generateDigest } from '@/libs/digest'
 import { extractArticle } from '@/libs/articleStructure'
 import { renderThemedArticle } from '@/libs/theme/decorate'
 import { getWechatTheme } from '@/libs/wechatThemes'
@@ -137,6 +164,9 @@ const form = ref({
   title: '',
   author: '',
   digest: '',
+  sourceUrl: '',
+  needOpenComment: 0 as 0 | 1,
+  onlyFansCanComment: 0 as 0 | 1,
   thumb_media_id: '',
   coverUrl: '',
   // newspic 专属：纯文本描述 + 图片列表（首图即封面，最多 20 张）
@@ -175,12 +205,15 @@ async function onOpen() {
   const markdown = readCurrentMarkdown()
   const { data: fm } = parseFrontMatter(markdown)
 
-  // 恢复当前笔记之前已保存的封面/作者/摘要
+  // 恢复当前笔记之前已保存的封面/作者/摘要/原文链接/评论设置
   if (ttsStore.wechatPublish.currentMediaId) {
     form.value.thumb_media_id = ttsStore.wechatPublish.coverMediaId
     form.value.coverUrl = ttsStore.wechatPublish.coverUrl
     form.value.author = ttsStore.wechatPublish.author
     form.value.digest = ttsStore.wechatPublish.digest
+    form.value.sourceUrl = ttsStore.wechatPublish.sourceUrl
+    form.value.needOpenComment = ttsStore.wechatPublish.needOpenComment
+    form.value.onlyFansCanComment = ttsStore.wechatPublish.onlyFansCanComment
   }
   // front matter 显式声明的元信息优先；其次 `# 标题` 结构约定；兜底文件名。
   // 每次打开都按当前笔记重算，避免残留上一篇笔记的标题
@@ -188,6 +221,9 @@ async function onOpen() {
   form.value.title = fm.title || art.title || ttsStore.cnote.title || ''
   if (fm.author) form.value.author = fm.author
   if (fm.digest) form.value.digest = fm.digest
+  if (fm.source) form.value.sourceUrl = fm.source
+  // 摘要兜底：仍为空时从正文自动生成（纯文本前 120 字，用户可改）
+  if (!form.value.digest) form.value.digest = generateDigest(markdown)
   // 作者兜底：系统默认作者
   if (!form.value.author && ttsStore.config.wechat.defaultAuthor) {
     form.value.author = ttsStore.config.wechat.defaultAuthor
@@ -390,6 +426,12 @@ async function saveDraft() {
     ElMessage.warning(t('wechat.needCover'))
     return
   }
+  // 原文链接校验：非空时必须是有效 http(s) 链接，否则微信会拒绝草稿且报错不直观
+  const sourceUrl = form.value.sourceUrl.trim()
+  if (sourceUrl && !/^https?:\/\//i.test(sourceUrl)) {
+    ElMessage.error(t('wechat.sourceUrlInvalid'))
+    return
+  }
   const markdown = readCurrentMarkdown()
   if (!markdown && !isImagePost) {
     ElMessage.warning(t('wechat.needContent'))
@@ -412,10 +454,10 @@ async function saveDraft() {
           author: form.value.author || '',
           digest: form.value.digest || '',
           content: await renderWechatHtml(markdown),
-          content_source_url: '',
+          content_source_url: sourceUrl,
           thumb_media_id: form.value.thumb_media_id,
-          need_open_comment: 0 as const,
-          only_fans_can_comment: 0 as const,
+          need_open_comment: form.value.needOpenComment,
+          only_fans_can_comment: form.value.onlyFansCanComment,
         }
 
     let result: any
@@ -435,11 +477,14 @@ async function saveDraft() {
     } else {
       ElMessage.success(t('wechat.draftSaved'))
       ttsStore.setPublishStatus('idle')
-      // Persist cover/author/digest for this note
+      // Persist cover/author/digest/source/comment settings for this note
       ttsStore.wechatPublish.coverMediaId = form.value.thumb_media_id
       ttsStore.wechatPublish.coverUrl = form.value.coverUrl
       ttsStore.wechatPublish.author = form.value.author
       ttsStore.wechatPublish.digest = form.value.digest
+      ttsStore.wechatPublish.sourceUrl = sourceUrl
+      ttsStore.wechatPublish.needOpenComment = form.value.needOpenComment
+      ttsStore.wechatPublish.onlyFansCanComment = form.value.onlyFansCanComment
     }
   } catch (e: any) {
     ElMessage.error(t('wechat.publishFail', { msg: e.message }))
@@ -450,7 +495,7 @@ async function saveDraft() {
 async function publish() {
   const mediaId = ttsStore.wechatPublish.currentMediaId
   if (!mediaId) {
-    ElMessage.warning(t('wechat.needCover'))
+    ElMessage.warning(t('wechat.needSaveDraft'))
     return
   }
   ttsStore.setPublishStatus('publishing')
@@ -459,7 +504,10 @@ async function publish() {
     // 无权限(48001)或接口异常时 errmsg 有值但 errcode 可能为空，必须一起检查
     if (result && (result.errcode || result.errmsg)) {
       const msg = String(result.errmsg || result.errcode)
-      const friendly = msg.includes('48001') ? t('wechat.publishUnauthorized') : t('wechat.publishFail', { msg })
+      const is48001 = msg.includes('48001')
+      // 学习一次：48001 持久化标记，之后对话框直接引导草稿流程、禁用发布按钮
+      if (is48001) ttsStore.setWechatPublishBlocked(true)
+      const friendly = is48001 ? t('wechat.publishUnauthorized') : t('wechat.publishFail', { msg })
       ElMessage.error(friendly)
       ttsStore.setPublishStatus('error', friendly)
       return
@@ -469,6 +517,8 @@ async function publish() {
       ttsStore.setPublishStatus('error', t('wechat.publishNotAccepted'))
       return
     }
+    // 发布被受理：账号有权限，清除 48001 学习标记（如换绑了企业号）
+    if (ttsStore.config.wechat.publishBlocked) ttsStore.setWechatPublishBlocked(false)
     ttsStore.wechatPublish.publishId = result.publish_id
     ElMessage.success(t('wechat.publishingHint'))
     ttsStore.setPublishStatus('success')
@@ -477,7 +527,9 @@ async function publish() {
   } catch (e: any) {
     // 48001 = 公众号未认证，无 API 发布权限，只能去 mp 后台/订阅号助手手动发布
     const msg = String(e?.message || '')
-    const friendly = msg.includes('48001') ? t('wechat.publishUnauthorized') : msg
+    const is48001 = msg.includes('48001')
+    if (is48001) ttsStore.setWechatPublishBlocked(true)
+    const friendly = is48001 ? t('wechat.publishUnauthorized') : msg
     ElMessage.error(friendly)
     ttsStore.setPublishStatus('error', friendly)
   }
@@ -512,6 +564,32 @@ function openDraftList() {
 </script>
 
 <style scoped>
+.blocked-alert {
+  margin-bottom: 12px;
+}
+
+.comment-switches {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.comment-hint {
+  font-size: 12px;
+  color: #909399;
+}
+
+.original-hint {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: #f4f4f5;
+  color: #909399;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .dialog-footer {
   display: flex;
   gap: 8px;

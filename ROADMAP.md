@@ -25,9 +25,9 @@ Snowpub 的公开功能路线图。欢迎通过 Issue 讨论需求、提交 PR �
 - [x] **Paste/drag image upload in editor · 编辑器图片粘贴上传**
   Paste or drop an image while writing → saved to the note's `imgs/` folder (content-hash named, deduplicated) and inserted as a relative path. Local images are uploaded to WeChat CDN in one sweep at publish time.
   写作时粘贴/拖拽图片 → 存入笔记 `imgs/` 目录（内容哈希命名、自动去重）并插入相对路径；发布时统一上传微信 CDN。
-- [ ] **Publish dialog finishing touches · 发布字段收尾**
-  Source URL, original-content declaration, comment settings, auto-generated digest.
-  原文链接、原创声明、评论开关、摘要自动生成。
+- [x] **Publish dialog finishing touches · 发布字段收尾**
+  Source URL (front matter `source:`), comment switches, auto-generated digest, originality-declaration guidance (save draft → enable in mp console), and personal-account publish guidance with a persisted 48001 marker.
+  原文链接（front matter `source:`）、评论开关、摘要自动生成、原创声明引导（先存草稿→后台开启）、个人号发布引导（48001 持久化标记）。
 - [ ] **Smart cover · 智能封面**
   Suggest the first article image as cover; crop presets for headline (2.35:1) and secondary (1:1) slots.
   自动取首图为封面，头条 2.35:1 / 次条 1:1 裁剪预设。
