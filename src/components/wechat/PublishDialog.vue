@@ -115,7 +115,8 @@ import { useTtsStore } from '@/store/store'
 import { useI18n } from 'vue-i18n'
 import { parseFrontMatter, stripFrontMatter } from '@/libs/frontMatter'
 import { extractArticle } from '@/libs/articleStructure'
-import { createWechatMd, buildStyledWechatHtml, type WxFootnote } from '@/libs/wechatRender'
+import { renderThemedArticle } from '@/libs/theme/decorate'
+import { getWechatTheme } from '@/libs/wechatThemes'
 import CoverPicker from './CoverPicker.vue'
 import DraftList from './DraftList.vue'
 import MaterialLibrary from './MaterialLibrary.vue'
@@ -361,11 +362,9 @@ async function renderWechatHtml(markdown: string): Promise<string> {
       return newUrl ? full.replace(src, newUrl) : full
     })
   }
-  // Step 4: render to HTML — 与预览一致的外链脚注转换 + 计算样式内联（微信只保留内联样式）
-  const footnotes: WxFootnote[] = []
-  const md = createWechatMd(footnotes)
-  const bodyHtml = md.render(processed)
-  return buildStyledWechatHtml(bodyHtml, footnotes, ttsStore.wechatTheme, t('wechat.references'))
+  // Step 4: render to HTML — 与预览共用 renderThemedArticle，主题样式已内联（微信只保留内联样式）
+  const theme = getWechatTheme(ttsStore.wechatTheme)
+  return renderThemedArticle(processed, theme, t('wechat.references'))
 }
 
 async function saveDraft() {
