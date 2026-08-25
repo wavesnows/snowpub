@@ -168,6 +168,7 @@ const zh = {
       hideAllFiles: '隐藏隐藏文件',
       openDevTools: '打开开发者工具',
       saveSuccess: '文件保存成功',
+      imageSaveFailed: '图片保存失败',
       saveFailed: '文件保存失败',
       noFileOpen: '当前没有打开的文件',
       readFileFailed: '读取文件失败',
