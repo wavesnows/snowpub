@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, dialog, Notification } from "electron";
+import { app, BrowserWindow, shell, ipcMain, dialog, Notification, session } from "electron";
 import { release } from "os";
 import { join } from "path";
 import { execSync, spawn } from "child_process";
@@ -99,6 +99,20 @@ function saveWindowState() {
 
 async function createWindow() {
   const windowState = getWindowState();
+
+  // 微信 CDN（mmbiz.qpic.cn / qlogo.cn）防盗链：请求带非微信域 Referer 时
+  // 返回"此图片来自微信公众号，未经允许不可引用"占位图（约 2KB，实测带 Referer
+  // 2090B vs 不带 311KB）。dev 模式 origin 是 http://127.0.0.1 会带 Referer；
+  // 打包版 file:// 不带。统一在会话层剥离，预览/素材库/封面/草稿的 <img> 一并修复。
+  session.defaultSession.webRequest.onBeforeSendHeaders(
+    { urls: ["*://*.qpic.cn/*", "*://*.qlogo.cn/*"] },
+    (details, callback) => {
+      const requestHeaders = { ...details.requestHeaders };
+      delete requestHeaders["Referer"];
+      delete requestHeaders["referer"];
+      callback({ requestHeaders });
+    },
+  );
 
   win = new BrowserWindow({
     width: windowState.width,
