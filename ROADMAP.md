@@ -7,22 +7,27 @@ Snowpub 的公开功能路线图。欢迎通过 Issue 讨论需求、提交 PR �
 
 ---
 
+## Already Built · 已有能力
+
+- Draft CRUD, publish + status polling · 草稿增删改查、发布与状态轮询
+- Material library · 素材库管理
+- Local images auto-uploaded on publish · 发布时本地图片自动上传微信 CDN
+- Style-inlined rendering · 样式内联渲染（微信只保留内联样式）
+- 4 built-in themes · 4 套内置主题
+- External links → footnotes · 外链自动转脚注
+- Image posts (newspic) · 图片消息发布
+
 ## v1.0 — Core Writing & Publishing Experience · 核心写作与发布体验
 
-The foundation: write in Markdown, see exactly what WeChat readers will see, publish in one click.
-基础目标：用 Markdown 写作，所见即所得地预览微信效果，一键发布。
-
-- [ ] **Theme system with inlined styles · 主题系统（样式内联）**
-  Themes defined as portable `theme.json` specs; the renderer inlines all styles into HTML so WeChat preserves them. Ships with a gallery of built-in themes.
-  主题以 `theme.json` 配置定义，渲染器将样式内联进 HTML（微信会剥离 `<style>` 标签）。内置主题库。
-- [ ] **Paste/drag image upload · 图片粘贴上传**
-  Paste or drop an image into the editor → auto-uploaded to WeChat CDN, URL inserted inline. No local paths ever reach the draft.
-  编辑器内粘贴/拖拽图片 → 自动上传微信 CDN 并插入链接。
-- [ ] **Pre-publish image sweep · 发布前图片扫描**
-  Batch-upload any remaining local/base64 images before syncing the draft.
-- [ ] **Complete publish dialog · 发布字段补全**
-  Author, digest (auto-generated), source URL, original-content declaration.
-  作者、摘要（自动生成）、原文链接、原创声明。
+- [ ] **Theme system v2: themes as `theme.json` · 主题系统 v2（主题即配置）**
+  Refactor the hard-coded CSS themes into portable `theme.json` specs (colors, typography, spacing, per-element overrides). Custom themes become data, not code. Expand the built-in gallery.
+  将写死的 CSS 主题重构为可移植的 `theme.json`（配色、字体、间距、元素覆盖）。定制主题 = 填配置，不是写代码。扩充内置主题库。
+- [ ] **Paste/drag image upload in editor · 编辑器图片粘贴上传**
+  Paste or drop an image while writing → instantly uploaded to WeChat CDN, URL inserted inline.
+  写作时粘贴/拖拽图片 → 即时上传微信 CDN 并插入链接。
+- [ ] **Publish dialog finishing touches · 发布字段收尾**
+  Source URL, original-content declaration, comment settings, auto-generated digest.
+  原文链接、原创声明、评论开关、摘要自动生成。
 - [ ] **Smart cover · 智能封面**
   Suggest the first article image as cover; crop presets for headline (2.35:1) and secondary (1:1) slots.
   自动取首图为封面，头条 2.35:1 / 次条 1:1 裁剪预设。
@@ -32,7 +37,6 @@ The foundation: write in Markdown, see exactly what WeChat readers will see, pub
 - [ ] **Multi-account support · 多账号切换**
 - [ ] **Local ↔ remote draft sync status · 草稿同步状态与冲突处理**
 - [ ] **Snippet/template library · 片段与模板库**（开头结尾、关注卡片、往期回顾）
-- [ ] **Link footnote conversion · 链接转脚注**（微信正文不支持外链）
 - [ ] **Word count & reading time · 字数与阅读时长统计**
 - [ ] **User-contributed themes · 用户自定义主题**（导入/导出 `theme.json`）
 
