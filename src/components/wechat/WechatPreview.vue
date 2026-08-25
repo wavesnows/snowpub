@@ -48,20 +48,6 @@ const { t } = useI18n()
 const ttsStore = useTtsStore()
 const previewEl = ref<HTMLElement | null>(null)
 
-// 把相对图片路径解析为 file:// 绝对路径，保证本地图片在预览中可见。
-// 仅处理内联图片 ![alt](src) 的 src，保留可能存在的 title。
-const IMG_RE = /!\[([^\]]*)\]\(([^)\s]+)([^)]*)\)/g
-function resolveImagePaths(markdown: string): string {
-  const notePath = ttsStore.inputs.notePath
-  if (!notePath) return markdown
-  const dir = path.dirname(notePath)
-  return markdown.replace(IMG_RE, (match, alt: string, src: string, rest: string) => {
-    if (!src || src.startsWith('http') || src.startsWith('file://') || src.startsWith('data:')) return match
-    const abs = path.resolve(dir, src)
-    return `![${alt}](file://${abs}${rest})`
-  })
-}
-
 const renderedHtml = computed(() => {
   let markdown = stripFrontMatter(props.content || '')
   // 命中 `# 标题 … ## 内容` 约定：只渲染标题 + 内容区正文，元信息区不显示
@@ -69,10 +55,13 @@ const renderedHtml = computed(() => {
   if (art.matched) {
     markdown = (art.title ? `# ${art.title}\n\n` : '') + art.body
   }
-  markdown = resolveImagePaths(markdown)
   const theme = getWechatTheme(ttsStore.wechatTheme)
+  // 相对图片路径由渲染层的 image 规则解析为 file:// 绝对路径（markdown 源文本不改写，
+  // 否则 validateLink 在解析期拦截 file: 协议，图片会被渲染成纯文本）
+  const notePath = ttsStore.inputs.notePath
+  const opts = notePath ? { imageBaseDir: path.dirname(notePath) } : {}
   // renderThemedArticle 已把主题样式内联到每个标签，脚注块也包含在返回串里
-  return renderThemedArticle(markdown, theme, t('wechat.references'))
+  return renderThemedArticle(markdown, theme, t('wechat.references'), opts)
 })
 
 // 复制渲染后的内联样式 HTML（可直接粘贴到公众号编辑器）

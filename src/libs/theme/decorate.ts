@@ -1,8 +1,15 @@
 // 主题装饰器：把 CompiledTheme 的样式内联到 markdown-it token 流
 // 纯 Node 环境，无 DOM 依赖；渲染器覆盖 + core ruler 装饰双管齐下
 import MarkdownIt from 'markdown-it'
+import path from 'path'
 import type { CompiledTheme, ElementKey } from './types'
 import { installFootnoteRule, renderFootnoteBlock, type WxFootnote } from './footnotes'
+
+export interface RenderOptions {
+  /** 预览场景专用：相对图片路径基于此目录解析为 file:// 绝对路径。
+   *  发布场景不传——本地图已在渲染前批量上传并替换为 CDN URL。 */
+  imageBaseDir?: string
+}
 
 // markdown-it token.tag → 主题元素键
 // h1..h6 由 compile 合并 heading；s/del 都映射到 del；hr/img 默认渲染器走 renderToken
@@ -32,9 +39,30 @@ function decorateTokens(tokens: MarkdownIt.Token[], theme: CompiledTheme): void 
 }
 
 /** 创建带主题装饰的 MarkdownIt 实例。 */
-export function createThemedMd(theme: CompiledTheme, footnotes: WxFootnote[]): MarkdownIt {
+export function createThemedMd(theme: CompiledTheme, footnotes: WxFootnote[], opts: RenderOptions = {}): MarkdownIt {
   const md = new MarkdownIt({ html: false, linkify: true, typographer: true })
   installFootnoteRule(md, footnotes, theme)
+
+  // 图片相对路径解析为 file:// 绝对路径（预览可见）。
+  // 必须在渲染层改写 token 的 src，而非改写 markdown 源文本：
+  // markdown-it 的 validateLink 在解析期拦截 file: 协议，
+  // ![alt](file://…) 不会生成 image token，会被整体渲染成纯文本。
+  if (opts.imageBaseDir) {
+    const baseDir = opts.imageBaseDir
+    const defaultImage: MarkdownIt.Renderer.RenderRule = md.renderer.rules.image
+      ?? ((tokens, idx, options, _env, self) => self.renderToken(tokens, idx, options))
+    md.renderer.rules.image = (tokens, idx, options, env, self) => {
+      const token = tokens[idx]
+      const srcIndex = token.attrIndex('src')
+      if (srcIndex >= 0 && token.attrs) {
+        const src = token.attrs[srcIndex][1] as string
+        if (src && !src.startsWith('http') && !src.startsWith('file://') && !src.startsWith('data:')) {
+          token.attrs[srcIndex][1] = 'file://' + path.resolve(baseDir, src)
+        }
+      }
+      return defaultImage(tokens, idx, options, env, self)
+    }
+  }
 
   // 1. token 流装饰：block + inline 两层注入 style
   md.core.ruler.push('theme_decorate', (state) => {
@@ -68,9 +96,10 @@ export function renderThemedArticle(
   markdown: string,
   theme: CompiledTheme,
   referencesTitle: string,
+  opts: RenderOptions = {},
 ): string {
   const footnotes: WxFootnote[] = []
-  const md = createThemedMd(theme, footnotes)
+  const md = createThemedMd(theme, footnotes, opts)
   const body = md.render(markdown)
   const baseStyle = theme.styleFor('base')
   return `<section${baseStyle ? ` style="${baseStyle}"` : ''}>${body}${renderFootnoteBlock(footnotes, theme, referencesTitle)}</section>`
