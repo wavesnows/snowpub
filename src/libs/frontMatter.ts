@@ -5,6 +5,7 @@
 //   author: 作者名
 //   digest: 摘要（可选）
 //   cover: ./images/cover.png  （可选，相对笔记所在目录）
+//   source: https://example.com/original  （可选，原文链接）
 //   ---
 // 发布时自动读取这些字段作为默认值。
 
@@ -13,6 +14,7 @@ export interface FrontMatterData {
   author?: string
   digest?: string
   cover?: string
+  source?: string
 }
 
 export interface ParsedMarkdown {
@@ -51,6 +53,7 @@ export function parseFrontMatter(markdown: string): ParsedMarkdown {
     else if (key === 'author') data.author = value
     else if (key === 'digest') data.digest = value
     else if (key === 'cover') data.cover = value
+    else if (key === 'source') data.source = value
   }
   return { data, body: markdown.slice(m[0].length) }
 }

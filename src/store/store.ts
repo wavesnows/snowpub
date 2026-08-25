@@ -149,6 +149,9 @@ export const useTtsStore = defineStore(DFConf.appName, {
           defaultCoverUrl: store.get("wechat.defaultCoverUrl") || "",
           // 默认作者：新建笔记 front matter 与发布对话框的作者兜底
           defaultAuthor: store.get("wechat.defaultAuthor") || "",
+          // 发布接口被封印标记：上次发布遭遇 48001（个人订阅号无 API 发布权限），
+          // 之后打开对话框直接引导"存草稿→后台发布"，发布成功后自动清除
+          publishBlocked: (store.get("wechat.publishBlocked") as boolean) || false,
         },
       },
       settings: {
@@ -237,6 +240,11 @@ export const useTtsStore = defineStore(DFConf.appName, {
         digest: '',
         author: '',
         articleUrl: '', // 已发布后的文章 URL
+        // 原文链接（content_source_url）
+        sourceUrl: '',
+        // 评论设置（需公众号已开通留言功能）
+        needOpenComment: 0 as 0 | 1,
+        onlyFansCanComment: 0 as 0 | 1,
       },
     };
   },
@@ -780,6 +788,10 @@ export const useTtsStore = defineStore(DFConf.appName, {
     setDefaultAuthor(author: string) {
       this.config.wechat.defaultAuthor = author
       safeSet('wechat.defaultAuthor', author)
+    },
+    setWechatPublishBlocked(blocked: boolean) {
+      this.config.wechat.publishBlocked = blocked
+      safeSet('wechat.publishBlocked', blocked)
     },
     async uploadArticleImage(filePath: string) {
       return await ipcRenderer.invoke('wechat:uploadArticleImage', filePath)
