@@ -52,7 +52,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { EditorView, basicSetup } from 'codemirror'
 import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { Compartment, EditorState } from '@codemirror/state'
+import { Annotation, Compartment, EditorState, Transaction } from '@codemirror/state'
 import MarkdownIt from 'markdown-it'
 import Mark from 'mark.js'
 import { ElMessage } from 'element-plus'
@@ -126,13 +126,18 @@ const searchCountText = computed(() => {
   return `${currentIndex.value + 1} / ${matches.value.length}`
 })
 
+// 标记"程序化加载"事务：loadFile 的全量替换不是用户编辑，
+// updateListener 据此跳过 saveFile，且不进入 undo 历史（否则打开后 Cmd+Z 会清空文档）
+const loadAnnotation = Annotation.define<boolean>()
+
 function loadFile(filePath: string) {
   if (!filePath || !fs.existsSync(filePath)) return
   const text = fs.readFileSync(filePath, 'utf8')
   content.value = text
   if (cmView) {
     cmView.dispatch({
-      changes: { from: 0, to: cmView.state.doc.length, insert: text }
+      changes: { from: 0, to: cmView.state.doc.length, insert: text },
+      annotations: [loadAnnotation.of(true), Transaction.addToHistory.of(false)],
     })
   }
 }
@@ -329,7 +334,9 @@ onMounted(() => {
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
           content.value = update.state.doc.toString()
-          saveFile()
+          // 程序化加载（打开/切换笔记）不触发保存，避免打开即刷新 mtime
+          const isLoad = update.transactions.some((tr) => tr.annotation(loadAnnotation))
+          if (!isLoad) saveFile()
         }
       }),
     ],
