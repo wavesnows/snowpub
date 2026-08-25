@@ -55,13 +55,17 @@ import { oneDark } from '@codemirror/theme-one-dark'
 import { Compartment, EditorState } from '@codemirror/state'
 import MarkdownIt from 'markdown-it'
 import Mark from 'mark.js'
+import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { useTtsStore } from '@/store/store'
 import WechatPreview from '@/components/wechat/WechatPreview.vue'
 import { stripFrontMatter } from '@/libs/frontMatter'
+import { saveClipboardImage, imageExtForMime } from '@/libs/pasteImage'
 import '@/assets/md-preview.css'
 
 const fs = require('fs')
 
+const { t } = useI18n()
 const ttsStore = useTtsStore()
 const editorEl = ref<HTMLElement | null>(null)
 const previewEl = ref<HTMLElement | null>(null)
@@ -262,6 +266,56 @@ function handleSearchKeydown(event: KeyboardEvent) {
   }
 }
 
+// 粘贴/拖拽图片：落盘到笔记目录 imgs/ 并在插入点写入相对路径。
+// 这里只写本地文件，发布时由 PublishDialog 统一扫描上传 CDN；
+// 预览走渲染层 file:// 规则（WechatPreview / 上方 md.renderer.rules.image）。
+async function insertImages(files: File[], pos: number | null) {
+  const notePath = ttsStore.inputs.notePath
+  if (!notePath || !cmView) return
+  const noteDir = require('path').dirname(notePath)
+  const insertions: string[] = []
+  let failed = false
+  for (const file of files) {
+    try {
+      const rel = await saveClipboardImage(file, noteDir)
+      if (rel) insertions.push(`![](${rel})`)
+    } catch {
+      failed = true
+    }
+  }
+  if (failed) ElMessage.error(t('tools.imageSaveFailed'))
+  if (!insertions.length) return
+  const at = pos ?? cmView.state.selection.main.head
+  const text = insertions.join('\n')
+  cmView.dispatch({
+    changes: { from: at, insert: text },
+    selection: { anchor: at + text.length },
+  })
+  cmView.focus()
+}
+
+// 只拦截含可支持图片（png/jpg/gif/webp）的粘贴/拖放；其余走编辑器默认行为
+function pickSupportedImages(fileList: FileList | undefined): File[] {
+  return [...(fileList ?? [])].filter((f) => imageExtForMime(f.type) !== null)
+}
+
+const imageDropHandlers = EditorView.domEventHandlers({
+  paste(event) {
+    const files = pickSupportedImages(event.clipboardData?.files)
+    if (!files.length || !ttsStore.inputs.notePath) return false
+    event.preventDefault()
+    void insertImages(files, null)
+    return true
+  },
+  drop(event, view) {
+    const files = pickSupportedImages(event.dataTransfer?.files)
+    if (!files.length || !ttsStore.inputs.notePath) return false
+    event.preventDefault()
+    void insertImages(files, view.posAtCoords({ x: event.clientX, y: event.clientY }))
+    return true
+  },
+})
+
 onMounted(() => {
   cmView = new EditorView({
     doc: content.value,
@@ -271,6 +325,7 @@ onMounted(() => {
       oneDark,
       lineWrapCompartment.of(ttsStore.mdEditor.lineWrap ? EditorView.lineWrapping : []),
       readOnlyCompartment.of(EditorState.readOnly.of(ttsStore.readOnly)),
+      imageDropHandlers,
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
           content.value = update.state.doc.toString()

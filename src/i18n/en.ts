@@ -168,6 +168,7 @@ const en = {
       hideAllFiles: 'Hide hidden files',
       openDevTools: 'Open Developer Tools',
       saveSuccess: 'File saved successfully',
+      imageSaveFailed: 'Failed to save image',
       saveFailed: 'Failed to save file',
       noFileOpen: 'No file is currently open',
       readFileFailed: 'Failed to read file',

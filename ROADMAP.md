@@ -22,9 +22,9 @@ Snowpub 的公开功能路线图。欢迎通过 Issue 讨论需求、提交 PR �
 - [ ] **Theme system v2: themes as `theme.json` · 主题系统 v2（主题即配置）**
   Refactor the hard-coded CSS themes into portable `theme.json` specs (colors, typography, spacing, per-element overrides). Custom themes become data, not code. Expand the built-in gallery.
   将写死的 CSS 主题重构为可移植的 `theme.json`（配色、字体、间距、元素覆盖）。定制主题 = 填配置，不是写代码。扩充内置主题库。
-- [ ] **Paste/drag image upload in editor · 编辑器图片粘贴上传**
-  Paste or drop an image while writing → instantly uploaded to WeChat CDN, URL inserted inline.
-  写作时粘贴/拖拽图片 → 即时上传微信 CDN 并插入链接。
+- [x] **Paste/drag image upload in editor · 编辑器图片粘贴上传**
+  Paste or drop an image while writing → saved to the note's `imgs/` folder (content-hash named, deduplicated) and inserted as a relative path. Local images are uploaded to WeChat CDN in one sweep at publish time.
+  写作时粘贴/拖拽图片 → 存入笔记 `imgs/` 目录（内容哈希命名、自动去重）并插入相对路径；发布时统一上传微信 CDN。
 - [ ] **Publish dialog finishing touches · 发布字段收尾**
   Source URL, original-content declaration, comment settings, auto-generated digest.
   原文链接、原创声明、评论开关、摘要自动生成。
