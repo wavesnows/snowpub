@@ -22,7 +22,8 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item :label="t('wechat.articleTitle')">
-        <el-input v-model="form.title" :placeholder="t('wechat.articleTitle')" maxlength="64" show-word-limit />
+        <!-- 长文标题上限 64 字，图片消息（newspic）上限 20 字 -->
+        <el-input v-model="form.title" :placeholder="t('wechat.articleTitle')" :maxlength="form.type === 'newspic' ? 20 : 64" show-word-limit />
       </el-form-item>
       <!-- 长文（news）：封面 / 作者 / 摘要（封面紧跟标题：分享卡片三要素连着填） -->
       <template v-if="form.type === 'news'">
@@ -30,6 +31,7 @@
           <CoverPicker
             v-model="form.thumb_media_id"
             v-model:url="form.coverUrl"
+            @meta="(m) => { form.coverWidth = m.width; form.coverHeight = m.height }"
           />
         </el-form-item>
         <el-form-item :label="t('wechat.draftAuthor')">
@@ -60,18 +62,8 @@
           </div>
         </el-form-item>
       </template>
-      <!-- 图文（newspic）：纯文本描述 + 图片列表（首图即封面） -->
+      <!-- 图文（newspic）：图片列表（首图即封面）+ 纯文本描述（图片是主体，放上面） -->
       <template v-else>
-        <el-form-item :label="t('wechat.imageContent')">
-          <el-input
-            v-model="form.content"
-            type="textarea"
-            :rows="4"
-            :placeholder="t('wechat.imageContentPlaceholder')"
-            maxlength="1000"
-            show-word-limit
-          />
-        </el-form-item>
         <el-form-item :label="t('wechat.imageList')">
           <div class="imgpost-editor">
             <div class="imgpost-grid" v-if="form.images.length">
@@ -88,6 +80,16 @@
               <span class="imgpost-count">{{ form.images.length }}/20</span>
             </div>
           </div>
+        </el-form-item>
+        <el-form-item :label="t('wechat.imageContent')">
+          <el-input
+            v-model="form.content"
+            type="textarea"
+            :rows="4"
+            :placeholder="t('wechat.imageContentPlaceholder')"
+            maxlength="1000"
+            show-word-limit
+          />
         </el-form-item>
       </template>
     </el-form>
@@ -131,7 +133,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
 import MarkdownIt from 'markdown-it'
 import path from 'path'
@@ -141,6 +143,8 @@ import { useTtsStore } from '@/store/store'
 import { useI18n } from 'vue-i18n'
 import { parseFrontMatter, stripFrontMatter } from '@/libs/frontMatter'
 import { generateDigest } from '@/libs/digest'
+import { COVER_RATIO_OPTIONS, apiRatioFor, coverCropRect01, extractFirstImage, imageSizeFromUrl } from '@/libs/coverCrop'
+import { findUnsupportedChars, stripUnsupportedChars } from '@/libs/textSanitize'
 import { extractArticle } from '@/libs/articleStructure'
 import { renderThemedArticle } from '@/libs/theme/decorate'
 import { getWechatTheme } from '@/libs/wechatThemes'
@@ -169,6 +173,9 @@ const form = ref({
   onlyFansCanComment: 0 as 0 | 1,
   thumb_media_id: '',
   coverUrl: '',
+  // 封面图原始尺寸（算 cover_info 裁剪坐标用；0 表示未知，保存时退化为不裁剪）
+  coverWidth: 0,
+  coverHeight: 0,
   // newspic 专属：纯文本描述 + 图片列表（首图即封面，最多 20 张）
   content: '',
   images: [] as Array<{ media_id: string; url: string }>,
@@ -177,6 +184,13 @@ const form = ref({
 const imgLibVisible = ref(false)
 const imgUploading = ref(false)
 const collecting = ref(false)
+
+// 图片消息标题上限 20 字：切到图文时截断已有长标题（maxlength 只挡新输入，不动存量）
+watch(() => form.value.type, (type) => {
+  if (type === 'newspic' && form.value.title.length > 20) {
+    form.value.title = form.value.title.slice(0, 20)
+  }
+})
 
 const canSave = computed(() => {
   if (!form.value.title) return false
@@ -209,6 +223,8 @@ async function onOpen() {
   if (ttsStore.wechatPublish.currentMediaId) {
     form.value.thumb_media_id = ttsStore.wechatPublish.coverMediaId
     form.value.coverUrl = ttsStore.wechatPublish.coverUrl
+    form.value.coverWidth = ttsStore.wechatPublish.coverWidth
+    form.value.coverHeight = ttsStore.wechatPublish.coverHeight
     form.value.author = ttsStore.wechatPublish.author
     form.value.digest = ttsStore.wechatPublish.digest
     form.value.sourceUrl = ttsStore.wechatPublish.sourceUrl
@@ -228,16 +244,21 @@ async function onOpen() {
   if (!form.value.author && ttsStore.config.wechat.defaultAuthor) {
     form.value.author = ttsStore.config.wechat.defaultAuthor
   }
-  // 封面：front matter cover > 已恢复封面 > 内置默认封面
+  // 封面：front matter cover > 正文首图 > 内置默认封面
   if (!form.value.thumb_media_id) {
     if (fm.cover) {
       await applyFrontMatterCover(fm.cover)
+    }
+    if (!form.value.thumb_media_id) {
+      await applyFirstImageCover(markdown)
     }
     if (!form.value.thumb_media_id) {
       const def = await ttsStore.ensureDefaultCover()
       if (def) {
         form.value.thumb_media_id = def.media_id
         form.value.coverUrl = def.url
+        form.value.coverWidth = def.width
+        form.value.coverHeight = def.height
       }
     }
   }
@@ -260,16 +281,52 @@ function markdownToPlainText(markdown: string): string {
   return (div.innerText || '').replace(/\n{3,}/g, '\n\n').trim()
 }
 
-// 上传 front matter 中指定的本地封面图（相对笔记目录）
+// 上传 front matter 中指定的封面图（本地相对路径或外链；去重缓存，原图上传）
 async function applyFrontMatterCover(cover: string) {
   const notePath = ttsStore.cnote.lastPath
   const dir = notePath ? path.dirname(notePath) : process.cwd()
-  const abs = path.resolve(dir, cover)
-  if (!fs.existsSync(abs)) return
-  const result = await ttsStore.addImageMaterial(abs)
+  const result = await ttsStore.uploadCoverSource(cover, dir)
   if (result && result.media_id) {
     form.value.thumb_media_id = result.media_id
     form.value.coverUrl = result.url || ''
+    form.value.coverWidth = result.width || 0
+    form.value.coverHeight = result.height || 0
+  }
+}
+
+// 正文首图作为封面（本地相对路径或外链；去重缓存，原图上传）
+async function applyFirstImageCover(markdown: string) {
+  const src = extractFirstImage(markdown)
+  if (!src || src.startsWith('data:')) return
+  const notePath = ttsStore.cnote.lastPath
+  const dir = notePath ? path.dirname(notePath) : process.cwd()
+  const result = await ttsStore.uploadCoverSource(src, dir)
+  if (result && result.media_id) {
+    form.value.thumb_media_id = result.media_id
+    form.value.coverUrl = result.url || ''
+    form.value.coverWidth = result.width || 0
+    form.value.coverHeight = result.height || 0
+  }
+}
+
+// 按当前比例生成草稿 cover_info；original、尺寸未知或源图比例已一致时返回 null（微信按原图处理）
+function buildCoverInfo(width: number, height: number) {
+  const ratio = ttsStore.wechatPublish.coverRatio
+  const apiRatio = apiRatioFor(ratio)
+  if (!apiRatio) return null
+  const opt = COVER_RATIO_OPTIONS.find((o) => o.value === ratio)!
+  const rect = coverCropRect01(width, height, opt.w, opt.h)
+  if (!rect) return null
+  return {
+    crop_percent_list: [
+      {
+        ratio: apiRatio,
+        x1: rect.x1.toFixed(4),
+        y1: rect.y1.toFixed(4),
+        x2: rect.x2.toFixed(4),
+        y2: rect.y2.toFixed(4),
+      },
+    ],
   }
 }
 
@@ -422,6 +479,29 @@ async function saveDraft() {
       ElMessage.warning(t('wechat.needImages'))
       return
     }
+    // 图文标题/描述仅支持纯文本：emoji 及生僻符号会被微信以"特殊字符"拒稿，先检测再确认移除
+    const bad = [...new Set([...findUnsupportedChars(form.value.title), ...findUnsupportedChars(form.value.content)])]
+    if (bad.length) {
+      try {
+        await ElMessageBox.confirm(
+          t('wechat.unsupportedCharsConfirm', { chars: bad.slice(0, 8).join(' '), count: bad.length }),
+          t('wechat.unsupportedCharsTitle'),
+          { confirmButtonText: t('wechat.unsupportedCharsRemove'), cancelButtonText: t('common.cancel'), type: 'warning' },
+        )
+      } catch {
+        return
+      }
+      form.value.title = stripUnsupportedChars(form.value.title)
+      form.value.content = stripUnsupportedChars(form.value.content)
+      if (!form.value.title) {
+        ElMessage.warning(t('wechat.needTitle'))
+        return
+      }
+      if (!form.value.content.trim()) {
+        ElMessage.warning(t('wechat.needContent'))
+        return
+      }
+    }
   } else if (!form.value.thumb_media_id) {
     ElMessage.warning(t('wechat.needCover'))
     return
@@ -440,6 +520,15 @@ async function saveDraft() {
 
   ttsStore.setPublishStatus('uploading')
   try {
+    // 封面裁剪以 cover_info 比例坐标下发（原图已上传，微信端按坐标裁；公众号后台仍可重框选）
+    let coverInfo = null
+    if (isImagePost) {
+      // 图文封面即首图：读首图尺寸算裁剪坐标
+      const firstSize = await imageSizeFromUrl(form.value.images[0].url)
+      if (firstSize) coverInfo = buildCoverInfo(firstSize.width, firstSize.height)
+    } else {
+      coverInfo = buildCoverInfo(form.value.coverWidth, form.value.coverHeight)
+    }
     const article = isImagePost
       ? {
           article_type: 'newspic',
@@ -448,6 +537,7 @@ async function saveDraft() {
           need_open_comment: 0 as const,
           only_fans_can_comment: 0 as const,
           image_info: { image_list: form.value.images.map(i => ({ image_media_id: i.media_id })) },
+          ...(coverInfo ? { cover_info: coverInfo } : {}),
         }
       : {
           title: form.value.title,
@@ -458,6 +548,7 @@ async function saveDraft() {
           thumb_media_id: form.value.thumb_media_id,
           need_open_comment: form.value.needOpenComment,
           only_fans_can_comment: form.value.onlyFansCanComment,
+          ...(coverInfo ? { cover_info: coverInfo } : {}),
         }
 
     let result: any
@@ -480,6 +571,7 @@ async function saveDraft() {
       // Persist cover/author/digest/source/comment settings for this note
       ttsStore.wechatPublish.coverMediaId = form.value.thumb_media_id
       ttsStore.wechatPublish.coverUrl = form.value.coverUrl
+      ttsStore.setCoverSize(form.value.coverWidth, form.value.coverHeight)
       ttsStore.wechatPublish.author = form.value.author
       ttsStore.wechatPublish.digest = form.value.digest
       ttsStore.wechatPublish.sourceUrl = sourceUrl
