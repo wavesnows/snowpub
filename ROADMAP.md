@@ -28,9 +28,9 @@ Snowpub 的公开功能路线图。欢迎通过 Issue 讨论需求、提交 PR �
 - [x] **Publish dialog finishing touches · 发布字段收尾**
   Source URL (front matter `source:`), comment switches, auto-generated digest, originality-declaration guidance (save draft → enable in mp console), and personal-account publish guidance with a persisted 48001 marker.
   原文链接（front matter `source:`）、评论开关、摘要自动生成、原创声明引导（先存草稿→后台开启）、个人号发布引导（48001 持久化标记）。
-- [ ] **Smart cover · 智能封面**
-  Suggest the first article image as cover; crop presets for headline (2.35:1) and secondary (1:1) slots.
-  自动取首图为封面，头条 2.35:1 / 次条 1:1 裁剪预设。
+- [x] **Smart cover · 智能封面**
+  First article image suggested as cover; original image uploaded once with crop coordinates passed via WeChat's `cover_info` — headline (2.35:1) / secondary (1:1) / original presets, ratio switching without re-upload, re-framable in the mp console.
+  自动取首图为封面；原图上传一次、裁剪坐标走微信 `cover_info`——头条 2.35:1 / 次条 1:1 / 原始三档预设，切比例免重传，公众号后台可重框选。
 
 ## v1.x — Efficiency & Growth · 效率与进阶
 
