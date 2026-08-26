@@ -245,6 +245,13 @@ export const useTtsStore = defineStore(DFConf.appName, {
         // 评论设置（需公众号已开通留言功能）
         needOpenComment: 0 as 0 | 1,
         onlyFansCanComment: 0 as 0 | 1,
+        // 封面裁剪比例（保存草稿时写入 cover_info）：original=原图 2.35=头条 1:1=次条
+        coverRatio: (store.get('wechat.coverRatio') as 'original' | '2.35' | '1:1') || '2.35',
+        // 封面上传去重缓存：源标识(路径/URL+mtime+size) → 已上传素材（原图，含尺寸），避免重复传素材库
+        coverUploads: (store.get('wechat.coverUploads') as Record<string, { media_id: string; url: string; width?: number; height?: number }>) || {},
+        // 当前封面图原始尺寸（算 cover_info 裁剪坐标用），随封面设置/恢复更新
+        coverWidth: (store.get('wechat.coverWidth') as number) || 0,
+        coverHeight: (store.get('wechat.coverHeight') as number) || 0,
       },
     };
   },
@@ -800,12 +807,66 @@ export const useTtsStore = defineStore(DFConf.appName, {
       return await ipcRenderer.invoke('wechat:addImageMaterial', filePath)
     },
 
-    // 获取默认封面（内置品牌图）的 media_id；未上传过则先上传并缓存
-    async ensureDefaultCover(): Promise<{ media_id: string; url: string } | null> {
+    setCoverRatio(ratio: 'original' | '2.35' | '1:1') {
+      this.wechatPublish.coverRatio = ratio
+      safeSet('wechat.coverRatio', ratio)
+    },
+
+    // 上传封面图源（本地路径/相对路径/http(s) URL）为素材：
+    // 统一解析为本地文件 → 去重缓存命中直接返回 → 读取图片尺寸 → add_material 上传原图。
+    // 裁剪不在本地做——保存草稿时以 cover_info 比例坐标下发，素材库不产生裁剪副本。
+    // 返回 { media_id, url, width, height }、微信错误对象 { errcode, ... }，或 null（源不可用/下载失败）。
+    async uploadCoverSource(src: string, noteDir: string): Promise<any> {
+      const { downloadImageToTmp, imageSizeFromFile } = await import('@/libs/coverCrop')
+      let localPath = ''
+      let cacheKey = ''
+      if (/^https?:\/\//i.test(src)) {
+        localPath = (await downloadImageToTmp(src)) || ''
+        if (!localPath) return null
+        cacheKey = `url:${src}`
+      } else {
+        const rel = src.startsWith('file://') ? src.slice(7) : src
+        const abs = path.isAbsolute(rel) ? rel : path.resolve(noteDir, rel)
+        if (!fs.existsSync(abs)) return null
+        const stat = fs.statSync(abs)
+        cacheKey = `file:${abs}:${stat.mtimeMs}:${stat.size}`
+        localPath = abs
+      }
+      const cached = this.wechatPublish.coverUploads[cacheKey]
+      if (cached) return cached
+      const size = await imageSizeFromFile(localPath).catch(() => ({ width: 0, height: 0 }))
+      const result = await this.addImageMaterial(localPath)
+      if (result && result.media_id) {
+        const entry = { media_id: result.media_id, url: result.url || '', width: size.width, height: size.height }
+        this.wechatPublish.coverUploads[cacheKey] = entry
+        safeSet('wechat.coverUploads', this.wechatPublish.coverUploads)
+        return entry
+      }
+      return result
+    },
+
+    setCoverSize(width: number, height: number) {
+      this.wechatPublish.coverWidth = width
+      this.wechatPublish.coverHeight = height
+      safeSet('wechat.coverWidth', width)
+      safeSet('wechat.coverHeight', height)
+    },
+
+    // 获取默认封面（内置品牌图）的 media_id 与尺寸；未上传过则先上传并缓存
+    async ensureDefaultCover(): Promise<{ media_id: string; url: string; width: number; height: number } | null> {
+      let size = { width: 0, height: 0 }
+      try {
+        const [{ ensureDefaultCoverFile }, { imageSizeFromFile }] = await Promise.all([
+          import('@/libs/defaultCover'),
+          import('@/libs/coverCrop'),
+        ])
+        size = await imageSizeFromFile(ensureDefaultCoverFile()).catch(() => ({ width: 0, height: 0 }))
+      } catch { /* 尺寸读取失败不阻断 */ }
       if (this.config.wechat.defaultCoverMediaId) {
         return {
           media_id: this.config.wechat.defaultCoverMediaId,
           url: this.config.wechat.defaultCoverUrl,
+          ...size,
         };
       }
       try {
@@ -816,7 +877,7 @@ export const useTtsStore = defineStore(DFConf.appName, {
           this.config.wechat.defaultCoverUrl = result.url || '';
           safeSet('wechat.defaultCoverMediaId', result.media_id);
           safeSet('wechat.defaultCoverUrl', result.url || '');
-          return { media_id: result.media_id, url: result.url || '' };
+          return { media_id: result.media_id, url: result.url || '', ...size };
         }
         return null;
       } catch (e) {
