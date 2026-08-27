@@ -115,6 +115,8 @@ const zh = {
     fileTree: {
       filterPlaceholder: '过滤关键词',
       createMdFile: '新建笔记',
+      createDemoNote: '主题演示',
+      demoNoteName: '主题演示',
       tplDigestHint: '摘要（可选，不填则由微信自动截取正文）',
       tplCoverHint: '（可选，不填则发布时使用默认封面）',
       createFolder: '新建文件夹',
@@ -367,6 +369,14 @@ const zh = {
       themeBlack: '科技黑',
       themeOrange: '活力橙',
       themeDefault: '默认白',
+      themeBlue: '知乎蓝',
+      themeRed: '中国红',
+      themeSerif: '墨色衬线',
+      themeWarm: '暖阳米白',
+      themeMorandi: '莫兰迪',
+      themePink: '樱花粉',
+      themeNight: '暗夜',
+      themeBamboo: '青竹',
       // 预览
       previewTitle: '微信预览',
       // 发布
