@@ -9,10 +9,12 @@
           style="width: 120px;"
           @change="(v: string) => ttsStore.setWechatTheme(v)"
         >
-          <el-option :label="t('wechat.themeGreen')" value="wechat-green" />
-          <el-option :label="t('wechat.themeBlack')" value="wechat-black" />
-          <el-option :label="t('wechat.themeOrange')" value="wechat-orange" />
-          <el-option :label="t('wechat.themeDefault')" value="wechat-default" />
+          <el-option
+            v-for="opt in themeOptions"
+            :key="opt.value"
+            :label="t(opt.labelKey)"
+            :value="opt.value"
+          />
         </el-select>
         <el-tooltip :content="t('tools.copyAll')" placement="top">
           <el-button size="small" circle class="wx-tool-btn" @click="copyHtml">
@@ -40,13 +42,21 @@ import { useTtsStore } from '@/store/store'
 import { stripFrontMatter } from '@/libs/frontMatter'
 import { extractArticle } from '@/libs/articleStructure'
 import { renderThemedArticle } from '@/libs/theme/decorate'
-import { getWechatTheme } from '@/libs/wechatThemes'
+import { getWechatTheme, wechatThemes } from '@/libs/wechatThemes'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{ content: string }>()
 const { t } = useI18n()
 const ttsStore = useTtsStore()
 const previewEl = ref<HTMLElement | null>(null)
+
+// 主题选项从注册表自动生成：机器名 wechat-xxx → i18n key wechat.themeXxx，
+// 新增主题只需放 JSON + 注册 import + i18n 词条，本组件零改动。
+const themeOptions = [...wechatThemes.keys()].map((name) => {
+  const suffix = name.slice('wechat-'.length)
+  const camel = suffix.charAt(0).toUpperCase() + suffix.slice(1)
+  return { value: name, labelKey: `wechat.theme${camel}` }
+})
 
 const renderedHtml = computed(() => {
   let markdown = stripFrontMatter(props.content || '')

@@ -115,6 +115,8 @@ const en = {
     fileTree: {
       filterPlaceholder: 'Filter keyword',
       createMdFile: 'New Note',
+      createDemoNote: 'Theme Demo',
+      demoNoteName: 'Theme Demo',
       tplDigestHint: 'summary (optional, auto-extracted by WeChat if empty)',
       tplCoverHint: '(optional, default cover will be used when publishing if empty)',
       createFolder: 'New Folder',
@@ -367,6 +369,14 @@ const en = {
       themeBlack: 'Tech Black',
       themeOrange: 'Vibrant Orange',
       themeDefault: 'Plain White',
+      themeBlue: 'Zhihu Blue',
+      themeRed: 'Chinese Red',
+      themeSerif: 'Ink Serif',
+      themeWarm: 'Warm Cream',
+      themeMorandi: 'Morandi',
+      themePink: 'Sakura Pink',
+      themeNight: 'Night',
+      themeBamboo: 'Bamboo',
       // Preview
       previewTitle: 'WeChat Preview',
       // Publish

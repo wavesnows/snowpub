@@ -77,6 +77,10 @@
                   <el-icon><Document /></el-icon>
                   <span>{{ t('fileTree.createMdFile') }}</span>
                 </el-dropdown-item>
+                <el-dropdown-item v-if="node.data.isFolder" :command="{type:'demo', data:data}">
+                  <el-icon><Document /></el-icon>
+                  <span>{{ t('fileTree.createDemoNote') }}</span>
+                </el-dropdown-item>
                 <el-dropdown-item v-if="node.data.isFolder" :command="{type:'folder', data:data}">
                   <el-icon><Folder /></el-icon>
                   <span>{{ t('fileTree.createFolder') }}</span>
@@ -155,6 +159,8 @@ import Node from 'element-plus/es/components/tree/src/model/node'
 import {ElTree, ElMessage,ElMessageBox, ElPopconfirm} from 'element-plus'
 import { Search, InfoFilled, Star, StarFilled, Document, Folder, FolderOpened, Delete, Position, RemoveFilled } from "@element-plus/icons-vue"
 import {getNoteLabel} from "@/libs/noteUtil"
+import { DEMO_ARTICLE_MD } from "@/libs/demoArticle"
+import { DEFAULT_COVER_BASE64 } from "@/assets/brand/defaultCoverBase64"
 import { useTtsStore, Tree } from "@/store/store"
 import { log, dir } from "@/libs/logger"
 import { readDir,readNotes} from "@/libs/fileHandler"
@@ -374,6 +380,9 @@ const handleCommand = (command: any) => {
       case 'mdfile':
         appendMd(command.data)
         break;
+      case 'demo':
+        appendDemo(command.data)
+        break;
       case 'folder':
         dialogFormVisible.value = true;
         break;
@@ -525,6 +534,41 @@ const addFolder = () =>{
       ''
     ].join('\n')
     fs.writeFileSync(path, template, 'utf8')
+  }
+
+  // 新建「主题演示」笔记：内容与黄金样张同源（demoArticle.ts），覆盖全部排版元素，
+  // 方便在公众号预览里切换 12 套主题对比。演示图复用内置默认封面，解码到 imgs/ 下。
+  const appendDemo = (data: Tree) => {
+    const baseName = t('fileTree.demoNoteName')
+    let label = baseName
+    let path = join(data.path, label + '.md')
+    let seq = 2
+    while (fs.existsSync(path)) {
+      label = `${baseName}-${seq}`
+      path = join(data.path, label + '.md')
+      seq++
+    }
+    const imgsDir = join(data.path, 'imgs')
+    if (!fs.existsSync(imgsDir)) fs.mkdirSync(imgsDir, { recursive: true })
+    const demoImg = join(imgsDir, 'demo-cover.png')
+    if (!fs.existsSync(demoImg)) {
+      fs.writeFileSync(demoImg, Buffer.from(DEFAULT_COVER_BASE64, 'base64'))
+    }
+    const template = [
+      '---',
+      `title: ${label}`,
+      `author: ${ttsStore.config.wechat.defaultAuthor || ''}`,
+      '---',
+      '',
+      DEMO_ARTICLE_MD,
+    ].join('\n')
+    fs.writeFileSync(path, template, 'utf8')
+    const newChild: Tree = { label, path, isFolder: false, isLeaf: true }
+    if (!data.children) {
+      data.children = []
+    }
+    data.children.push(newChild as Tree)
+    ttsStore.inputs.notePath = path
   }
 
 const handleNodeClick = ((itemdata: Tree,node:Node) => {

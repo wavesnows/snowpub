@@ -4,11 +4,23 @@ import greenJson from '@/themes/wechat-green.json'
 import blackJson from '@/themes/wechat-black.json'
 import orangeJson from '@/themes/wechat-orange.json'
 import defaultJson from '@/themes/wechat-default.json'
+import blueJson from '@/themes/wechat-blue.json'
+import redJson from '@/themes/wechat-red.json'
+import serifJson from '@/themes/wechat-serif.json'
+import warmJson from '@/themes/wechat-warm.json'
+import morandiJson from '@/themes/wechat-morandi.json'
+import pinkJson from '@/themes/wechat-pink.json'
+import nightJson from '@/themes/wechat-night.json'
+import bambooJson from '@/themes/wechat-bamboo.json'
 import { compileTheme } from '@/libs/theme/compile'
 import type { CompiledTheme } from '@/libs/theme/types'
 
 export const wechatThemes: Map<string, CompiledTheme> = new Map()
-for (const json of [greenJson, blackJson, orangeJson, defaultJson]) {
+for (const json of [
+  greenJson, blackJson, orangeJson, defaultJson,
+  blueJson, redJson, serifJson, warmJson,
+  morandiJson, pinkJson, nightJson, bambooJson,
+]) {
   const { theme } = compileTheme(json)
   wechatThemes.set(theme.meta.name, theme)
 }

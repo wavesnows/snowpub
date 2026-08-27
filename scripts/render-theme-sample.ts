@@ -1,11 +1,12 @@
-// 黄金文件生成器：固定 markdown fixture × 4 主题 → docs/theme-samples/<name>.html
-// Node 直跑，无 DOM 依赖；esbuild 打包后由 node 执行
+// 黄金文件生成器：演示文章（src/libs/demoArticle.ts，与编辑器「主题演示」新建项同源）
+// × 全部主题 → docs/theme-samples/<name>.html。Node 直跑，无 DOM 依赖；esbuild 打包后由 node 执行
 import { readdirSync, existsSync } from 'node:fs'
 import { readFile, mkdir, writeFile } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { compileTheme } from '../src/libs/theme/compile'
 import { renderThemedArticle } from '../src/libs/theme/decorate'
+import { DEMO_ARTICLE_MD } from '../src/libs/demoArticle'
 
 // esbuild 把脚本打包到 node_modules/.cache/，import.meta.url 指向缓存文件而非源文件；
 // 从缓存位置向上查找包含 src/themes/ 的目录作为仓库根，对任意 cwd 都稳定
@@ -22,11 +23,10 @@ function findRepoRoot(start: string): string {
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = findRepoRoot(__dirname)
 const THEMES_DIR = join(REPO_ROOT, 'src/themes')
-const FIXTURE = join(REPO_ROOT, 'scripts/theme-sample-fixture.md')
 const OUT_DIR = join(REPO_ROOT, 'docs/theme-samples')
 
 async function main(): Promise<void> {
-  const markdown = await readFile(FIXTURE, 'utf8')
+  const markdown = DEMO_ARTICLE_MD
   const files = readdirSync(THEMES_DIR).filter((f) => f.endsWith('.json'))
 
   await mkdir(OUT_DIR, { recursive: true })
