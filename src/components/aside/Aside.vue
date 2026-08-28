@@ -17,6 +17,10 @@
           <el-icon><Clock /></el-icon>
           <span></span>
         </el-menu-item>
+        <el-menu-item index="4">
+          <el-icon><MagicStick /></el-icon>
+          <span></span>
+        </el-menu-item>
       <!-- <el-menu-item index="3">
           <el-icon><Files /></el-icon>
           <span></span>
@@ -42,7 +46,7 @@
   import { useTtsStore } from "@/store/store";
   import { storeToRefs } from "pinia";
   import AConf from "./AConfig.vue";
-  import { StarFilled, Clock, House } from '@element-plus/icons-vue';
+  import { StarFilled, Clock, House, MagicStick } from '@element-plus/icons-vue';
 
   const ttsStore = useTtsStore();
   const { page, config } = storeToRefs(ttsStore);

@@ -45,6 +45,7 @@ Snowpub 的公开功能路线图。欢迎通过 Issue 讨论需求、提交 PR �
 - Article analytics dashboard · 阅读数据分析面板
 - Batch publishing tools · 批量发布
 - Theme marketplace · 主题市场
+- Preview consolidation: WeChat preview as the single view · 视图收敛（普通预览并入微信预览，待编辑器文内搜索覆盖渲染文本场景后）
 
 ---
 

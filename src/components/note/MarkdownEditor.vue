@@ -61,6 +61,7 @@ import { useTtsStore } from '@/store/store'
 import WechatPreview from '@/components/wechat/WechatPreview.vue'
 import { stripFrontMatter } from '@/libs/frontMatter'
 import { saveClipboardImage, imageExtForMime } from '@/libs/pasteImage'
+import { registerEditorView } from '@/libs/editorBridge'
 import '@/assets/md-preview.css'
 
 const fs = require('fs')
@@ -342,6 +343,7 @@ onMounted(() => {
     ],
     parent: editorEl.value!,
   })
+  registerEditorView(cmView)
 
   loadFile(ttsStore.inputs.notePath)
   marker = new Mark(previewEl.value!)
@@ -350,6 +352,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   cmView?.destroy()
   cmView = null
+  registerEditorView(null)
   marker?.unmark()
   marker = null
 })

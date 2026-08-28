@@ -178,7 +178,9 @@ export const useTtsStore = defineStore(DFConf.appName, {
       mdMode: 'edit' as 'edit' | 'preview',
       mdTheme: (store.get('mdTheme') as string) || 'teal',
       mdCopyTrigger: 0,
-      mdPreviewSplit: 'single' as 'single' | 'wechat', // preview layout: single (default) | wechat (dual with wechat preview)
+      // 默认微信双栏（所见即所得是产品门面）；用户切换偏好持久化，下次启动保持
+      mdPreviewSplit: (store.get('mdPreviewSplit') as 'single' | 'wechat') || 'wechat',
+
       wechatTheme: (store.get('wechatTheme') as string) || 'wechat-green', // wechat preview theme
       gitAvailable: false,
       gitStatus: {
@@ -765,6 +767,7 @@ export const useTtsStore = defineStore(DFConf.appName, {
     },
     setMdPreviewSplit(mode: 'single' | 'wechat') {
       this.mdPreviewSplit = mode;
+      safeSet('mdPreviewSplit', mode);
     },
     setLineWrap(v: boolean) {
       this.mdEditor.lineWrap = v;

@@ -12,7 +12,7 @@
           <el-option
             v-for="opt in themeOptions"
             :key="opt.value"
-            :label="t(opt.labelKey)"
+            :label="opt.label"
             :value="opt.value"
           />
         </el-select>
@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import path from 'path'
 import { ElMessage } from 'element-plus'
 import { CopyDocument } from '@element-plus/icons-vue'
@@ -42,21 +42,30 @@ import { useTtsStore } from '@/store/store'
 import { stripFrontMatter } from '@/libs/frontMatter'
 import { extractArticle } from '@/libs/articleStructure'
 import { renderThemedArticle } from '@/libs/theme/decorate'
-import { getWechatTheme, wechatThemes } from '@/libs/wechatThemes'
+import { getWechatTheme, wechatThemes, loadUserThemes, isBuiltinTheme } from '@/libs/wechatThemes'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{ content: string }>()
-const { t } = useI18n()
+const { t, te } = useI18n()
 const ttsStore = useTtsStore()
 const previewEl = ref<HTMLElement | null>(null)
 
-// 主题选项从注册表自动生成：机器名 wechat-xxx → i18n key wechat.themeXxx，
-// 新增主题只需放 JSON + 注册 import + i18n 词条，本组件零改动。
-const themeOptions = [...wechatThemes.keys()].map((name) => {
+// 主题选项从注册表自动生成：内置 wechat-xxx → i18n key wechat.themeXxx；
+// 用户主题没有 i18n 词条，直接用 spec 里的 displayName。
+// wechatThemes 是 reactive Map，AI/文件新增主题后本列表自动刷新。
+const themeOptions = computed(() => [...wechatThemes.entries()].map(([name, theme]) => {
   const suffix = name.slice('wechat-'.length)
   const camel = suffix.charAt(0).toUpperCase() + suffix.slice(1)
-  return { value: name, labelKey: `wechat.theme${camel}` }
-})
+  const key = `wechat.theme${camel}`
+  return { value: name, label: isBuiltinTheme(name) && te(key) ? t(key) : (theme.meta.displayName || name) }
+}))
+
+// 切换笔记本后重扫用户主题目录（挂载时也跑一次，覆盖应用启动后的首个笔记本）
+function reloadUserThemes() {
+  loadUserThemes(ttsStore.notebook.currentPath)
+}
+onMounted(reloadUserThemes)
+watch(() => ttsStore.notebook.currentPath, reloadUserThemes)
 
 const renderedHtml = computed(() => {
   let markdown = stripFrontMatter(props.content || '')

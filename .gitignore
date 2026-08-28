@@ -34,3 +34,4 @@ logs/
 *.deb
 *.rpm
 *.zip
+.cache/
