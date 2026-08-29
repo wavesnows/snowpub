@@ -11,7 +11,7 @@
 ## 功能特性
 
 - **双栏编辑** — 左侧 Markdown（CodeMirror）编辑，右侧微信样式实时预览
-- **微信主题** — 微信绿 / 科技黑 / 活力橙 / 默认白，随时切换
+- **微信主题** — 内置 12 套排版主题（微信绿 / 科技黑 / 活力橙 / 知乎蓝 / 中国红 / 墨色衬线 / 暖阳米白 / 莫兰迪 / 樱花粉 / 暗夜 / 青竹 / 默认白），随时切换
 - **公众号发布** — 通过公众号官方 API：保存草稿、发布、查询发布状态
 - **图片素材库** — 本地图片上传到公众号素材库，文章封面图选择
 - **草稿箱同步** — 拉取 / 删除 / 直接发布公众号已有草稿
@@ -22,6 +22,21 @@
 - **内置终端** — 快速终端面板（`Ctrl+\``），自动定位到当前笔记所在目录
 - **收藏与最近** — 置顶、星标，快速访问常用笔记
 - **中英双语** — 界面支持中文和英文切换
+
+## 主题
+
+内置 12 套公众号排版主题，一键切换：
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/theme-samples/png/wechat-green.png" width="180" alt="微信绿"/><br/><sub><b>微信绿</b></sub></td>
+    <td align="center"><img src="docs/theme-samples/png/wechat-black.png" width="180" alt="科技黑"/><br/><sub><b>科技黑</b></sub></td>
+    <td align="center"><img src="docs/theme-samples/png/wechat-morandi.png" width="180" alt="莫兰迪"/><br/><sub><b>莫兰迪</b></sub></td>
+    <td align="center"><img src="docs/theme-samples/png/wechat-serif.png" width="180" alt="墨色衬线"/><br/><sub><b>墨色衬线</b></sub></td>
+  </tr>
+</table>
+
+另有 8 套：默认白 / 知乎蓝 / 活力橙 / 中国红 / 暖阳米白 / 樱花粉 / 暗夜 / 青竹。
 
 ## 安装
 

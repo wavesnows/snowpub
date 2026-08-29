@@ -11,7 +11,7 @@ A local-first WeChat Official Account writing & publishing tool built with Elect
 ## Features
 
 - **Dual-pane editor** — Markdown (CodeMirror) on the left, WeChat-styled preview on the right
-- **WeChat themes** — Green / Black / Orange / Plain, switchable anytime
+- **WeChat themes** — 12 built-in styles (Green / Black / Orange / Blue / Red / Serif / Cream / Morandi / Pink / Night / Bamboo / Plain), switchable anytime
 - **Publish to WeChat** — Via Official Account API: save drafts, publish, query status
 - **Image library** — Upload local images to WeChat material library, pick cover for articles
 - **Draft sync** — Fetch / delete / publish existing drafts from your OA draft box
@@ -22,6 +22,21 @@ A local-first WeChat Official Account writing & publishing tool built with Elect
 - **Built-in terminal** — Quick access terminal panel (`Ctrl+\``), auto-navigates to current note's directory
 - **Favorites & Recent** — Pin, star, and quickly revisit notes
 - **i18n** — English and Chinese UI
+
+## Themes
+
+12 built-in WeChat themes — one click to switch:
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/theme-samples/png/wechat-green.png" width="180" alt="WeChat Green"/><br/><sub><b>微信绿</b></sub></td>
+    <td align="center"><img src="docs/theme-samples/png/wechat-black.png" width="180" alt="Tech Black"/><br/><sub><b>科技黑</b></sub></td>
+    <td align="center"><img src="docs/theme-samples/png/wechat-morandi.png" width="180" alt="Morandi"/><br/><sub><b>莫兰迪</b></sub></td>
+    <td align="center"><img src="docs/theme-samples/png/wechat-serif.png" width="180" alt="Ink Serif"/><br/><sub><b>墨色衬线</b></sub></td>
+  </tr>
+</table>
+
+Plus 8 more: Plain White / Zhihu Blue / Vibrant Orange / Chinese Red / Warm Cream / Sakura Pink / Night / Bamboo.
 
 ## Installation
 
