@@ -26,7 +26,7 @@
   "mac": {
     "icon": "build/icon.icns",
     "category": "public.app-category.productivity",
-    "artifactName": "${productName}_${version}_${arch}.${ext}",
+    "artifactName": "${name}_${version}_${arch}.${ext}",
     "target": ["dmg", "zip"]
   },
   "dmg": {
@@ -37,7 +37,7 @@
   },
   "win": {
     "icon": "build/icon.ico",
-    "artifactName": "${productName}_${version}.${ext}",
+    "artifactName": "${name}_${version}.${ext}",
     "target": [
       { "target": "nsis", "arch": ["x64"] }
     ]

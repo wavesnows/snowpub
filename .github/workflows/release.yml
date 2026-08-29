@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   # ── 先创建 Release（非 Draft），再并行构建 ──
   create-release:
