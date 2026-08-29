@@ -93,7 +93,7 @@ npm run build    # 生产构建
 扫下方微信码，添加时请备注「定制」：
 
 <div align="center">
-  <img src="src/assets/wx.jpg" width="160" alt="微信" /><br/>
+  <img src="src/assets/wx-contact.png" width="160" alt="微信" /><br/>
   <sub><b>微信</b> · 添加备注「定制」</sub>
 </div>
 

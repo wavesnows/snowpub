@@ -95,7 +95,7 @@ Want a signature theme for your brand, or a feature built on top of snowpub? I t
 Scan the WeChat code below and mention **"custom"** in your note:
 
 <div align="center">
-  <img src="src/assets/wx.jpg" width="160" alt="WeChat" /><br/>
+  <img src="src/assets/wx-contact.png" width="160" alt="WeChat" /><br/>
   <sub><b>WeChat</b> · note "custom" when adding</sub>
 </div>
 
