@@ -18,8 +18,11 @@
 ## Features
 
 - **Dual-pane editor** — Markdown (CodeMirror) on the left, WeChat-styled preview on the right
-- **WeChat themes** — Green / Black / Orange / Plain, switchable anytime
-- **Publish to WeChat** — Save drafts, publish, query status via OA API
+- **WeChat themes** — 12 built-in styles (Green / Black / Orange / Blue / Red / Serif / Cream / Morandi / Pink / Night / Bamboo / Plain), switchable anytime
+- **AI assistant** — Side panel driving locally installed agent CLIs (Claude Code / OpenCode / OpenClaw, BYOA); presets for polish / title / digest / custom theme generation, replies insert back at cursor
+- **Publish to WeChat** — Save drafts, publish image-text articles and image posts (newspic), query status via OA API
+- **Paste & drop images** — Paste or drop images while writing; stored in the note's `imgs/` folder and uploaded to WeChat at publish time
+- **Smart cover** — First article image as suggested cover, ratio presets via WeChat `cover_info`
 - **Image library** — Upload local images to OA material library, pick cover
 - **Draft sync** — Fetch / delete / publish existing OA drafts
 - **Footnote references** — External links auto-converted to bottom citations
@@ -45,6 +48,13 @@
 2. Select GitHub or Gitee
 3. Enter your username and Personal Access Token (requires `repo` permission)
 4. Add a remote notebook — snowpub will clone an existing repo or create a new one
+
+## AI Assistant
+
+1. Install at least one agent CLI: [Claude Code](https://code.claude.com/docs/en/setup), [OpenCode](https://opencode.ai), or [OpenClaw](https://docs.openclaw.ai)
+2. Open the **AI Assistant** tab in the right sidebar — detected CLIs appear automatically
+3. Select text (or use the whole article) → click a preset: **Polish / Title / Digest / Theme**
+4. A generated theme can be saved and applied in one click; it lands in `<notebook>/themes/` and appears in the preview theme dropdown
 
 ## Keyboard Shortcuts
 
@@ -72,8 +82,11 @@
 ## 功能特性
 
 - **双栏编辑** — 左侧 Markdown（CodeMirror），右侧微信样式实时预览
-- **微信主题** — 微信绿 / 科技黑 / 活力橙 / 默认白，随时切换
-- **公众号发布** — 通过官方 API 保存草稿、发布、查询发布状态
+- **微信主题** — 内置 12 套主题（微信绿 / 科技黑 / 活力橙 / 知乎蓝 / 中国红 / 墨色衬线 / 暖阳米白 / 莫兰迪 / 樱花粉 / 暗夜 / 青竹 / 默认白），随时切换
+- **AI 助手** — 侧边面板调度本机 agent CLI（Claude Code / OpenCode / OpenClaw，BYOA），预设润色 / 起标题 / 写摘要 / 生成主题，回复可回插编辑器
+- **公众号发布** — 通过官方 API 保存草稿、发布图文与图片消息（newspic）、查询发布状态
+- **粘贴/拖拽传图** — 写作时粘贴或拖入图片，存入笔记 `imgs/` 目录，发布时统一上传微信
+- **智能封面** — 自动取首图为封面，三档比例走微信 `cover_info`
 - **图片素材库** — 本地图片上传到公众号素材库，文章封面图选择
 - **草稿箱同步** — 拉取 / 删除 / 直接发布公众号已有草稿
 - **外链转底部引用** — 自动将外链转为微信友好的底部脚注
@@ -92,6 +105,13 @@
 6. 点发布图标 → 填标题 / 作者 / 摘要 / 选封面图 → **保存草稿** → **发布**
 
 > 发布时 Markdown 中的本地图片会自动上传到公众号并替换为公众号 URL。
+
+## AI 助手
+
+1. 至少安装一个 agent CLI：[Claude Code](https://code.claude.com/docs/en/setup)、[OpenCode](https://opencode.ai) 或 [OpenClaw](https://docs.openclaw.ai)
+2. 打开右侧栏 **AI 助手** 页签 —— 已检测到的 CLI 自动列出
+3. 选中文字（或用全文）→ 点预设动作：**润色 / 起标题 / 写摘要 / 生成主题**
+4. 生成的主题可一键保存并应用，落盘在 `<笔记本>/themes/`，自动出现在预览主题下拉中
 
 ## 键盘快捷键
 

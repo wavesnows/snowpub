@@ -14,8 +14,12 @@ Snowpub 的公开功能路线图。欢迎通过 Issue 讨论需求、提交 PR �
 - Local images auto-uploaded on publish · 发布时本地图片自动上传微信 CDN
 - Style-inlined rendering · 样式内联渲染（微信只保留内联样式）
 - 12 built-in themes · 12 套内置主题
+- User themes as `theme.json` · 用户主题（`<notebook>/themes/*.json` 自动加载）
 - External links → footnotes · 外链自动转脚注
 - Image posts (newspic) · 图片消息发布
+- Paste/drop image upload in editor · 编辑器粘贴/拖拽传图（内容哈希去重）
+- Smart cover via `cover_info` · 智能封面（三档比例免重传）
+- AI assistant (BYOA) · AI 助手——调度本机 agent CLI（Claude Code / OpenCode / OpenClaw），润色/起标题/写摘要/生成主题
 
 ## v1.0 — Core Writing & Publishing Experience · 核心写作与发布体验
 
@@ -38,7 +42,9 @@ Snowpub 的公开功能路线图。欢迎通过 Issue 讨论需求、提交 PR �
 - [ ] **Local ↔ remote draft sync status · 草稿同步状态与冲突处理**
 - [ ] **Snippet/template library · 片段与模板库**（开头结尾、关注卡片、往期回顾）
 - [ ] **Word count & reading time · 字数与阅读时长统计**
-- [ ] **User-contributed themes · 用户自定义主题**（导入/导出 `theme.json`）
+- [x] **User-contributed themes · 用户自定义主题**
+  Drop a `theme.json` into `<notebook>/themes/` and it appears in the preview theme dropdown (bad files skipped silently, built-in names protected); the AI assistant can also generate one from a text description and save it there. Sharing a theme = sharing one JSON file.
+  把 `theme.json` 放进 `<笔记本>/themes/` 即出现在预览主题下拉中（坏文件静默跳过、内置名防撞）；AI 助手也可按描述生成主题并落盘于此。分享主题 = 分享一个 JSON 文件。
 
 ## Under Consideration · 观望中
 
@@ -52,5 +58,5 @@ Snowpub 的公开功能路线图。欢迎通过 Issue 讨论需求、提交 PR �
 ## Contributing · 参与
 
 - Feature requests → [Issues](../../issues)
-- Want to design a theme? The `theme.json` spec will be documented in `docs/` once v1.0 lands.
-- 想设计主题？v1.0 落地后会在 `docs/` 公布 `theme.json` 规范。
+- Want to design a theme? The `theme.json` spec lives in [docs/theme-system-design.md](docs/theme-system-design.md).
+- 想设计主题？`theme.json` 规范见 [docs/theme-system-design.md](docs/theme-system-design.md)。

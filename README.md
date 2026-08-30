@@ -12,7 +12,10 @@ A local-first WeChat Official Account writing & publishing tool built with Elect
 
 - **Dual-pane editor** — Markdown (CodeMirror) on the left, WeChat-styled preview on the right
 - **WeChat themes** — 12 built-in styles (Green / Black / Orange / Blue / Red / Serif / Cream / Morandi / Pink / Night / Bamboo / Plain), switchable anytime
-- **Publish to WeChat** — Via Official Account API: save drafts, publish, query status
+- **AI assistant** — Bring-your-own-agent side panel that drives locally installed CLIs (Claude Code / OpenCode / OpenClaw — you pay your own tokens). One-click presets: polish selection or full article, generate titles, write digests, or generate a custom WeChat theme from a text description and apply it instantly. Replies insert back into the editor at cursor
+- **Publish to WeChat** — Via Official Account API: save drafts, publish image-text articles and image posts (newspic), query status
+- **Paste & drop images** — Paste or drag an image while writing; saved to the note's `imgs/` folder (content-hash named, deduplicated) and uploaded to WeChat in one sweep at publish time
+- **Smart cover** — First article image suggested as cover; ratio presets (2.35:1 headline / 1:1 / original) passed via WeChat `cover_info`, switchable without re-upload
 - **Image library** — Upload local images to WeChat material library, pick cover for articles
 - **Draft sync** — Fetch / delete / publish existing drafts from your OA draft box
 - **Footnote references** — External links auto-converted to bottom citations (WeChat-friendly)
@@ -71,6 +74,15 @@ npm run build    # production build
 > Local images in your Markdown are auto-uploaded to WeChat and `src` replaced with OA URLs during publish.
 
 See [User Guide](docs/guide.md) for details.
+
+## AI Assistant Setup
+
+snowpub does not bundle any model — it orchestrates agent CLIs already on your machine (BYOA):
+
+1. Install at least one: [Claude Code](https://code.claude.com/docs/en/setup), [OpenCode](https://opencode.ai), or [OpenClaw](https://docs.openclaw.ai)
+2. Open the **AI Assistant** tab in the right sidebar — detected CLIs are listed automatically
+3. Select text (or use the whole article) → click a preset: **Polish / Title / Digest / Theme**
+4. Click **Insert** on a reply to write it back to the editor at the cursor
 
 ## Git Sync Setup
 
