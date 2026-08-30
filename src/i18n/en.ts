@@ -455,7 +455,7 @@ const en = {
     },
     ai: {
       title: 'AI Assistant',
-      agent: 'Model:',
+      agent: 'Agent:',
       refresh: 'Re-detect',
       clear: 'Clear chat',
       notInstalled: 'No CLI detected. Install one first:',

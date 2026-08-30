@@ -455,7 +455,7 @@ const zh = {
     },
     ai: {
       title: 'AI 助手',
-      agent: '模型：',
+      agent: 'Agent：',
       refresh: '重新检测',
       clear: '清空对话',
       notInstalled: '未检测到可用的 CLI，请先安装：',
