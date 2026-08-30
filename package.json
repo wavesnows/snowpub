@@ -37,8 +37,14 @@
     "VITE_DEV_SERVER_PORT": 3344
   },
   "keywords": [
+    "wechat",
+    "wechat-official-account",
+    "official-account",
+    "公众号",
+    "markdown",
+    "markdown-editor",
+    "publishing",
     "electron",
-    "rollup",
     "vite",
     "vue3",
     "vue"
