@@ -74,7 +74,8 @@ export function compileTheme(input: unknown): CompileResult {
     throw new ThemeCompileError('meta must be an object')
   }
   const m = root.meta as Record<string, unknown>
-  const reqStr = ['name', 'displayName', 'author', 'version'] as const
+  // author 非必填：手写/AI 生成常留空，归一化时补默认值
+  const reqStr = ['name', 'displayName', 'version'] as const
   for (const k of reqStr) {
     const v = m[k]
     if (typeof v !== 'string' || v.trim() === '') {
@@ -122,7 +123,8 @@ export function compileTheme(input: unknown): CompileResult {
   const meta: ThemeMeta = {
     name: theme.meta.name,
     displayName: theme.meta.displayName,
-    author: theme.meta.author,
+    author:
+      typeof m.author === 'string' && m.author.trim() !== '' ? m.author : 'user',
     version: theme.meta.version,
     specVersion: '1',
     ...(theme.meta.description !== undefined ? { description: theme.meta.description } : {}),

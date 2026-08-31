@@ -31,7 +31,7 @@ export function buildDigestPrompt(content: string): string {
 // ── 主题生成：注入精简版 spec，让任意 CLI 都能产出可编译的 theme.json ──
 const THEME_SPEC = `Snowpub 公众号主题 theme.json 规范：
 - 顶层结构：{ "meta": {...}, "vars": {...}, "base": {...}, "elements": {...} }
-- meta：{ "name": "wechat-xxx"（必填，英文 kebab-case）, "displayName": "中文展示名"（必填）, "author": "", "version": "1.0.0", "specVersion": "1", "dark": false }
+- meta：{ "name": "wechat-xxx"（必填，英文 kebab-case）, "displayName": "中文展示名"（必填）, "author": "作者名（必填，非空字符串）", "version": "1.0.0", "specVersion": "1", "dark": false }
 - vars：颜色变量表，如 { "primary": "#07c160" }，样式里用 "\${primary}" 引用
 - base：根容器样式（font-size、line-height、color、background、padding）
 - elements：元素样式覆盖。可用键：heading（所有标题的公共样式）、h1、h2、h3、h4、h5、h6、p、strong、em、del、a、code、pre、preCode、img、blockquote、ul、ol、li、hr、table、th、td、footnoteRef、footnoteBlock、footnoteTitle、footnoteItem、footnoteLink
@@ -40,7 +40,7 @@ const THEME_SPEC = `Snowpub 公众号主题 theme.json 规范：
 - 注意 img 必须包含 "max-width": "100%"`
 
 const THEME_EXAMPLE = JSON.stringify({
-  meta: { name: 'wechat-example', displayName: '示例', author: '', version: '1.0.0', specVersion: '1', dark: false },
+  meta: { name: 'wechat-example', displayName: '示例', author: 'snowpub', version: '1.0.0', specVersion: '1', dark: false },
   vars: { primary: '#07c160', text: '#3f536e' },
   base: { 'font-size': '16px', 'line-height': '1.8', color: '${text}', background: '#fff', padding: '16px 18px' },
   elements: {
