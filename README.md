@@ -2,7 +2,7 @@
 
 A local-first WeChat Official Account writing & publishing tool built with Electron and Vue 3. Write in Markdown, preview in WeChat style, sync with Git, and publish to your Official Account — all without leaving your desktop.
 
-[官网](https://snowpub.wavesnows.com) · [Download](../../releases) · [Guide](docs/guide.md) · [中文说明](README_CN.md)
+[官网](https://snowpub.wavesnows.com) · [Download](../../releases) · [Guide](https://snowpub.wavesnows.com/guide/) · [中文说明](README_CN.md)
 
 ---
 
@@ -73,7 +73,7 @@ npm run build    # production build
 
 > Local images in your Markdown are auto-uploaded to WeChat and `src` replaced with OA URLs during publish.
 
-See [User Guide](docs/guide.md) for details.
+See [User Guide](https://snowpub.wavesnows.com/guide/) for details.
 
 ## AI Assistant Setup
 

@@ -2,7 +2,7 @@
 
 一款本地优先的微信公众号写作与发布工具，基于 Electron + Vue 3 构建。用 Markdown 写作，实时预览微信样式，一键发布到公众号。
 
-[官网](https://snowpub.wavesnows.com) · [下载](../../releases) · [使用说明](docs/guide.md) · [English](README.md)
+[官网](https://snowpub.wavesnows.com) · [下载](../../releases) · [使用说明](https://snowpub.wavesnows.com/guide/) · [English](README.md)
 
 ---
 
