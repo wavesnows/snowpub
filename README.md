@@ -91,6 +91,10 @@ Snowpub does not bundle any model — it orchestrates agent CLIs already on your
 3. Enter your username, repository name, and personal access token
 4. Use the git button in the toolbar or configure auto-sync in **Scheduler**
 
+## Community
+
+QQ Group: **1121242452** · [Join](https://qm.qq.com/q/TWpaXmxqcU)
+
 ## Donate
 
 If Snowpub is useful to you, consider buying me a coffee ☕

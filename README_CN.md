@@ -89,6 +89,10 @@ Snowpub 不内置模型，调度你本机已有的 agent CLI（BYOA）：
 3. 填入用户名、仓库名和 Personal Access Token
 4. 使用工具栏 Git 按钮手动同步，或在 **调度器** 中配置自动同步
 
+## 交流群
+
+QQ 群：**1121242452**（问题反馈、主题分享、更新通知）· [一键加群](https://qm.qq.com/q/TWpaXmxqcU)
+
 ## 捐赠
 
 如果 Snowpub 对你有帮助，欢迎请我喝杯咖啡 ☕

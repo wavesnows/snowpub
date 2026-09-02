@@ -125,6 +125,11 @@
 
 ---
 
+## 交流与反馈
+
+- **QQ 交流群：1121242452**（问题反馈、主题分享、更新通知）· [一键加群](https://qm.qq.com/q/TWpaXmxqcU)
+- Bug 与功能建议：[GitHub Issues](https://github.com/wavesnows/snowpub/issues)
+
 ## Development
 
 ### Prerequisites

@@ -207,6 +207,43 @@
     footer a { color: var(--primary); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
 
+    .community {
+      background: var(--bg);
+      padding: 48px 24px;
+      text-align: center;
+    }
+    .community h2 { font-size: 1.4rem; margin-bottom: 8px; color: var(--text); }
+    .community p { color: var(--muted); font-size: 0.95rem; margin-bottom: 24px; }
+    .qr-cards {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .qr-card { text-align: center; }
+    .qr-card img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+    .qr-card .qr-title { font-weight: 600; margin-top: 10px; }
+    .qr-card .qr-sub { font-size: 0.85rem; color: var(--muted); }
+    .qq-link {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 8px 20px;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .qq-link:hover { background: var(--primary); color: #fff; }
+
     .footer-links {
       display: flex;
       gap: 24px;
@@ -367,12 +404,38 @@
       });
   </script>
 
+  <!-- Community -->
+  <section class="community">
+    <h2>加入交流群</h2>
+    <p>问题反馈、主题分享、更新通知——QQ 群永久有效，扫码或搜索群号加入</p>
+    <div class="qr-cards">
+      <div class="qr-card">
+        <img src="qq-group.jpg" alt="Snowpub QQ 交流群二维码" />
+        <div class="qr-title">QQ 交流群</div>
+        <div class="qr-sub">群号 1121242452 · <a class="qq-link" href="https://qm.qq.com/q/TWpaXmxqcU">一键加群</a></div>
+      </div>
+    </div>
+    <h2 style="margin-top:16px">请作者喝咖啡 ☕</h2>
+    <p>如果 Snowpub 对你有帮助</p>
+    <div class="qr-cards">
+      <div class="qr-card">
+        <img src="donate-wechat.jpg" alt="微信支付赞赏码" />
+        <div class="qr-title">微信支付</div>
+      </div>
+      <div class="qr-card">
+        <img src="donate-alipay.jpg" alt="支付宝赞赏码" />
+        <div class="qr-title">支付宝</div>
+      </div>
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer>
     <div class="footer-links">
       <a href="https://github.com/wavesnows/snowpub">GitHub</a>
       <a href="https://github.com/wavesnows/snowpub/releases">Releases</a>
       <a href="guide.html">文档</a>
+      <a href="https://qm.qq.com/q/TWpaXmxqcU">QQ 群 1121242452</a>
       <a href="https://github.com/wavesnows/snowpub/issues">反馈问题</a>
     </div>
     <p>MIT © <a href="https://github.com/wavesnows">wavesnows</a> · 用 ❤️ 构建</p>
