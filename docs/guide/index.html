@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>快速开始 · Snowpub 文档</title>
+  <link rel="icon" type="image/png" href="../icon.png">
+  <meta name="description" content="5 分钟跑通安装、配置、发布全流程">
+  <meta property="og:title" content="快速开始 · Snowpub 文档">
+  <meta property="og:description" content="5 分钟跑通安装、配置、发布全流程">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #07c160;
+      --primary-dark: #06ad56;
+      --text: #303133;
+      --muted: #606266;
+      --border: #e4e7ed;
+      --bg: #f5f7fa;
+      --code-bg: #282c34;
+      --code-fg: #abb2bf;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ── 布局:左 240px 粘性侧边栏 + 右内容列 ── */
+    .layout { display: flex; min-height: 100vh; align-items: flex-start; }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 240px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 20px;
+      margin-bottom: 10px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar .brand img { width: 28px; height: 28px; border-radius: 7px; }
+
+    .sidebar .nav { display: flex; flex-direction: column; }
+
+    .sidebar .nav a {
+      display: block;
+      padding: 8px 20px 8px 17px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar .nav a:hover { color: var(--primary); }
+
+    .sidebar .nav a.active {
+      color: var(--primary);
+      font-weight: 600;
+      border-left: 3px solid var(--primary);
+    }
+
+    .main { flex: 1; min-width: 0; background: #fff; }
+
+    /* ── 正文 ── */
+    .content { max-width: 760px; margin: 0 auto; padding: 48px 40px 24px; }
+
+    .content h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin: 8px 0 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .content h2 { font-size: 1.35rem; font-weight: 600; margin: 40px 0 14px; }
+    .content h3 { font-size: 1.12rem; font-weight: 600; margin: 28px 0 10px; }
+    .content p { margin: 14px 0; }
+    .content strong { font-weight: 600; }
+
+    .content ul, .content ol { margin: 14px 0; padding-left: 1.6em; }
+    .content li { margin: 5px 0; }
+
+    .content a { color: var(--primary); text-decoration: none; }
+    .content a:hover { text-decoration: underline; }
+
+    .content blockquote {
+      margin: 16px 0;
+      padding: 6px 18px;
+      border-left: 3px solid var(--border);
+      color: var(--muted);
+    }
+
+    .content hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+    .content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+    /* 行内代码 */
+    .content code {
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      color: #476582;
+    }
+
+    /* 代码块:深底浅字 */
+    .content pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 16px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
+      line-height: 1.6;
+    }
+
+    .content pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.875rem;
+    }
+
+    /* 表格:斑马纹 */
+    .content table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.95rem; }
+    .content th, .content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    .content th { background: var(--bg); font-weight: 600; }
+    .content tbody tr:nth-child(even) { background: #fafafa; }
+
+    /* ── 提示框（markdown-it-container 渲染目标）── */
+    .admonition { margin: 20px 0; padding: 12px 20px 14px; border-radius: 0 8px 8px 0; }
+    .admonition p { margin: 4px 0; }
+    .admonition.tip { border-left: 4px solid var(--primary); background: #f2fbf6; }
+    .admonition.tip::before { content: '提示'; display: block; font-weight: 600; font-size: 0.9rem; color: var(--primary); margin-bottom: 2px; }
+    .admonition.warning { border-left: 4px solid #e6a23c; background: #fdf6ec; }
+    .admonition.warning::before { content: '注意'; display: block; font-weight: 600; font-size: 0.9rem; color: #b88230; margin-bottom: 2px; }
+
+    /* ── 上一页/下一页 ── */
+    .pager {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 20px 40px 56px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .pager a {
+      display: block;
+      max-width: 48%;
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .pager a:hover { border-color: var(--primary); color: var(--primary); }
+    .pager .pager-label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 2px; }
+    .pager .pager-next { text-align: right; }
+
+    /* ── 窄屏:侧边栏折叠为顶部条，布局单列 ── */
+    @media (max-width: 900px) {
+      .layout { flex-direction: column; }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 14px 16px 10px;
+      }
+
+      .sidebar .brand { padding-bottom: 10px; margin-bottom: 6px; }
+
+      .sidebar .nav { flex-direction: row; flex-wrap: wrap; gap: 2px 6px; }
+
+      .sidebar .nav a { border-left: none; padding: 5px 12px; border-radius: 999px; }
+
+      .sidebar .nav a.active { border-left: none; background: #f2fbf6; }
+
+      .content { padding: 24px 20px 16px; }
+
+      .pager { padding: 16px 20px 40px; flex-wrap: wrap; }
+      .pager a { max-width: 100%; flex: 1 1 180px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="../index.html">
+        <img src="../icon.png" alt="Snowpub">Snowpub
+      </a>
+      <nav class="nav">
+        <a href="index.html" title="5 分钟跑通安装、配置、发布全流程" class="active">快速开始</a>
+        <a href="install.html" title="下载、系统要求、install.sh 与自动更新">安装与更新</a>
+        <a href="wechat.html" title="AppID/AppSecret、IP 白名单、测试连接">公众号接入</a>
+        <a href="publish.html" title="双栏编辑、微信预览、发布对话框、草稿箱">写作与发布</a>
+        <a href="cover.html" title="粘贴传图、素材库、智能封面三档比例">图片与封面</a>
+        <a href="faq.html" title="48001、连接失败、AI 助手、Git 同步">常见问题</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <article class="content">
+<h1>快速开始</h1>
+<p>欢迎来到 Snowpub —— 本地优先的公众号写作与发布工具。5 分钟跑通全流程：</p>
+<h2>第一步：安装</h2>
+<p>从 <a href="https://github.com/wavesnows/snowpub/releases">Releases</a> 下载对应系统的安装包（macOS Apple Silicon / Intel、Windows），拖入「应用程序」。macOS 首次打开如提示「无法验证开发者」，在终端执行：</p>
+<pre><code class="language-bash">xattr -cr /Applications/Snowpub.app
+</code></pre>
+<p>详见<a href="install.html">安装与更新</a>。</p>
+<h2>第二步：选择笔记本文件夹</h2>
+<p>打开 Snowpub，侧边栏底部点击 ⚙ 齿轮打开设置 →「笔记本」标签页，选择一个文件夹作为笔记根目录。Snowpub 不会动你磁盘上的其他文件。</p>
+<h2>第三步：配置公众号</h2>
+<p>设置 →「公众号」标签页：</p>
+<ol>
+<li>填入 AppID / AppSecret（获取方式见<a href="wechat.html">公众号接入</a>）</li>
+<li>将本机公网 IP 加入公众号后台 IP 白名单</li>
+<li>点击「测试连接」，看到成功提示即可</li>
+</ol>
+<h2>第四步：写第一篇文章</h2>
+<ol>
+<li>侧边栏「+」新建 <code>.md</code> 笔记</li>
+<li>左侧写 Markdown，右侧自动渲染微信样式</li>
+<li>工具栏点微信预览图标，可切换 12 套主题</li>
+</ol>
+<h2>第五步：发布</h2>
+<p>工具栏点发布图标，填标题/作者/摘要/封面 →「存草稿」→「发布」。</p>
+<div class="admonition tip">
+<p>建议先用「存草稿」，到公众号后台确认排版无误后再发布。</p>
+</div>
+<hr>
+<p>下一步：<a href="wechat.html">公众号接入</a> 详细讲解 API 准备与白名单配置。</p>
+
+      </article>
+      <nav class="pager">
+        <span class="pager-empty"></span>
+        <a class="pager-next" href="install.html"><span class="pager-label">下一页</span>安装与更新</a>
+      </nav>
+    </main>
+  </div>
+</body>
+</html>
