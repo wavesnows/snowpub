@@ -1,4 +1,4 @@
-# snowpub
+# Snowpub
 
 A local-first WeChat Official Account writing & publishing tool built with Electron and Vue 3. Write in Markdown, preview in WeChat style, sync with Git, and publish to your Official Account — all without leaving your desktop.
 
@@ -6,7 +6,7 @@ A local-first WeChat Official Account writing & publishing tool built with Elect
 
 ---
 
-![snowpub](docs/Screenshot.png)
+![Snowpub](docs/Screenshot.png)
 
 ## Features
 
@@ -45,12 +45,12 @@ Plus 8 more: Plain White / Zhihu Blue / Vibrant Orange / Chinese Red / Warm Crea
 
 Download the latest installer from [Releases](../../releases):
 
-- macOS: `snowpub_x.x.x_arm64.dmg` (Apple Silicon) · `snowpub_x.x.x_x64.dmg` (Intel)
-- Windows: `snowpub_x.x.x.exe`
+- macOS: `Snowpub_x.x.x_arm64.dmg` (Apple Silicon) · `Snowpub_x.x.x_x64.dmg` (Intel)
+- Windows: `Snowpub_x.x.x.exe`
 
 > **macOS note:** The app is not code-signed. If macOS says the app is damaged, run this in Terminal and try again:
 > ```bash
-> xattr -cr /Applications/snowpub.app
+> xattr -cr /Applications/Snowpub.app
 > ```
 
 ## Build from Source
@@ -77,7 +77,7 @@ See [User Guide](docs/guide.md) for details.
 
 ## AI Assistant Setup
 
-snowpub does not bundle any model — it orchestrates agent CLIs already on your machine (BYOA):
+Snowpub does not bundle any model — it orchestrates agent CLIs already on your machine (BYOA):
 
 1. Install at least one: [Claude Code](https://code.claude.com/docs/en/setup), [OpenCode](https://opencode.ai), or [OpenClaw](https://docs.openclaw.ai)
 2. Open the **AI Assistant** tab in the right sidebar — detected CLIs are listed automatically
@@ -93,7 +93,7 @@ snowpub does not bundle any model — it orchestrates agent CLIs already on your
 
 ## Donate
 
-If snowpub is useful to you, consider buying me a coffee ☕
+If Snowpub is useful to you, consider buying me a coffee ☕
 
 <div align="center">
   <table>
@@ -113,7 +113,7 @@ If snowpub is useful to you, consider buying me a coffee ☕
 
 ## Customization Services
 
-Want a signature theme for your brand, or a feature built on top of snowpub? I take custom work:
+Want a signature theme for your brand, or a feature built on top of Snowpub? I take custom work:
 
 - **Theme customization** — your colors, typography, and layout, delivered as a drop-in theme
 - **Feature development** — batch publishing, asset workflows, and more, built as private modules on the open-source core

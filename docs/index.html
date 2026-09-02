@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>snowpub</title>
+  <title>Snowpub</title>
+  <link rel="icon" type="image/png" href="icon.png" />
   <meta name="description" content="本地优先的微信公众号写作与发布工具，支持 Markdown 编辑、微信样式预览、一键发布到公众号。" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,9 +33,14 @@
     }
 
     .hero-icon {
-      font-size: 72px;
+      width: 96px;
+      height: 96px;
+      border-radius: 22px;
       margin-bottom: 16px;
       display: block;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
 
     .hero h1 {
@@ -197,8 +203,8 @@
 
   <!-- Hero -->
   <section class="hero">
-    <span class="hero-icon">❄️</span>
-    <h1>snowpub</h1>
+    <img src="icon.png" class="hero-icon" alt="Snowpub 图标" />
+    <h1>Snowpub</h1>
     <p>本地优先的微信公众号写作与发布工具。用 Markdown 写作，实时预览微信样式，一键发布到公众号。</p>
     <div class="hero-actions">
       <a href="#download" class="btn btn-primary">
@@ -212,7 +218,7 @@
 
   <!-- Screenshot -->
   <section class="screenshot-section">
-    <img src="Screenshot.png" alt="snowpub 界面截图" />
+    <img src="Screenshot.png" alt="Snowpub 界面截图" />
   </section>
 
   <!-- Features -->
@@ -293,7 +299,7 @@
     <p class="download-note">开源免费 · MIT 协议</p>
     <p style="font-size:0.82rem;color:#c0c4cc;margin-top:12px;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.6">
       💡 <strong>macOS 提示：</strong>应用暂未签名，首次打开若提示「已损坏」，请在终端执行：<br>
-      <code style="background:#f5f7fa;padding:2px 8px;border-radius:4px;font-size:0.85em">xattr -cr /Applications/snowpub.app</code>
+      <code style="background:#f5f7fa;padding:2px 8px;border-radius:4px;font-size:0.85em">xattr -cr /Applications/Snowpub.app</code>
     </p>
   </section>
 
