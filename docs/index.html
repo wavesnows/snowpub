@@ -27,10 +27,27 @@
 
     /* ── Hero ── */
     .hero {
-      background: linear-gradient(135deg, #f0faf3 0%, #e8f5e9 100%);
+      background: #F2FBF6;
       padding: 80px 24px 64px;
       text-align: center;
+      position: relative;
+      overflow: hidden;
     }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 { color: #1A3C34; }
 
     .hero-icon {
       width: 96px;
@@ -203,6 +220,30 @@
 
   <!-- Hero -->
   <section class="hero">
+    <svg class="hero-bg" viewBox="0 0 2048 872" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="heroBg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#F2FBF6"/>
+          <stop offset="1" stop-color="#FFFFFF"/>
+        </linearGradient>
+      </defs>
+      <rect width="2048" height="872" fill="url(#heroBg)"/>
+      <circle cx="320" cy="240" r="180" fill="#07C160" opacity="0.05"/>
+      <circle cx="1780" cy="680" r="240" fill="#07C160" opacity="0.04"/>
+      <circle cx="1150" cy="180" r="90" fill="#4CC47C" opacity="0.05"/>
+      <g transform="translate(400,520) rotate(-40)">
+        <path d="M 96,0 C 60,-8 30,-28 8,-52 C -20,-80 -52,-88 -72,-84 L -72,84 C -52,88 -20,80 8,52 C 30,28 60,8 96,0 Z" fill="#1A3C34"/>
+        <path d="M 88,0 L 6,0" stroke="#F2FBF6" stroke-width="7" stroke-linecap="round"/>
+        <circle cx="-6" cy="0" r="11" fill="#F2FBF6"/>
+      </g>
+      <path d="M 545,455 Q 660,320 800,262" fill="none" stroke="#4CC47C" stroke-width="9" stroke-linecap="round" stroke-dasharray="2 26"/>
+      <g transform="translate(1550,190) rotate(-12)">
+        <path d="M 150,0 L -125,-82 L -52,-4 Z" fill="#07C160"/>
+        <path d="M 150,0 L -52,-4 L -125,82 Z" fill="#04954B"/>
+        <path d="M -52,-4 L -125,82 L -78,10 Z" fill="#067A3E"/>
+      </g>
+    </svg>
+    <div class="hero-content">
     <img src="icon.png" class="hero-icon" alt="Snowpub 图标" />
     <h1>Snowpub</h1>
     <p>本地优先的微信公众号写作与发布工具。用 Markdown 写作，实时预览微信样式，一键发布到公众号。</p>
@@ -213,6 +254,7 @@
       <a href="https://github.com/wavesnows/snowpub" class="btn btn-outline">
         ⭐ Star on GitHub
       </a>
+    </div>
     </div>
   </section>
 
