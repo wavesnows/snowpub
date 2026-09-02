@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片与封面 · Snowpub 文档</title>
+  <link rel="icon" type="image/png" href="../icon.png">
+  <meta name="description" content="粘贴传图、素材库、智能封面三档比例">
+  <meta property="og:title" content="图片与封面 · Snowpub 文档">
+  <meta property="og:description" content="粘贴传图、素材库、智能封面三档比例">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #07c160;
+      --primary-dark: #06ad56;
+      --text: #303133;
+      --muted: #606266;
+      --border: #e4e7ed;
+      --bg: #f5f7fa;
+      --code-bg: #282c34;
+      --code-fg: #abb2bf;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ── 布局:左 240px 粘性侧边栏 + 右内容列 ── */
+    .layout { display: flex; min-height: 100vh; align-items: flex-start; }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 240px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 20px;
+      margin-bottom: 10px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar .brand img { width: 28px; height: 28px; border-radius: 7px; }
+
+    .sidebar .nav { display: flex; flex-direction: column; }
+
+    .sidebar .nav a {
+      display: block;
+      padding: 8px 20px 8px 17px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar .nav a:hover { color: var(--primary); }
+
+    .sidebar .nav a.active {
+      color: var(--primary);
+      font-weight: 600;
+      border-left: 3px solid var(--primary);
+    }
+
+    .main { flex: 1; min-width: 0; background: #fff; }
+
+    /* ── 正文 ── */
+    .content { max-width: 760px; margin: 0 auto; padding: 48px 40px 24px; }
+
+    .content h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin: 8px 0 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .content h2 { font-size: 1.35rem; font-weight: 600; margin: 40px 0 14px; }
+    .content h3 { font-size: 1.12rem; font-weight: 600; margin: 28px 0 10px; }
+    .content p { margin: 14px 0; }
+    .content strong { font-weight: 600; }
+
+    .content ul, .content ol { margin: 14px 0; padding-left: 1.6em; }
+    .content li { margin: 5px 0; }
+
+    .content a { color: var(--primary); text-decoration: none; }
+    .content a:hover { text-decoration: underline; }
+
+    .content blockquote {
+      margin: 16px 0;
+      padding: 6px 18px;
+      border-left: 3px solid var(--border);
+      color: var(--muted);
+    }
+
+    .content hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+    .content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+    /* 行内代码 */
+    .content code {
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      color: #476582;
+    }
+
+    /* 代码块:深底浅字 */
+    .content pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 16px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
+      line-height: 1.6;
+    }
+
+    .content pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.875rem;
+    }
+
+    /* 表格:斑马纹 */
+    .content table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.95rem; }
+    .content th, .content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    .content th { background: var(--bg); font-weight: 600; }
+    .content tbody tr:nth-child(even) { background: #fafafa; }
+
+    /* ── 提示框（markdown-it-container 渲染目标）── */
+    .admonition { margin: 20px 0; padding: 12px 20px 14px; border-radius: 0 8px 8px 0; }
+    .admonition p { margin: 4px 0; }
+    .admonition.tip { border-left: 4px solid var(--primary); background: #f2fbf6; }
+    .admonition.tip::before { content: '提示'; display: block; font-weight: 600; font-size: 0.9rem; color: var(--primary); margin-bottom: 2px; }
+    .admonition.warning { border-left: 4px solid #e6a23c; background: #fdf6ec; }
+    .admonition.warning::before { content: '注意'; display: block; font-weight: 600; font-size: 0.9rem; color: #b88230; margin-bottom: 2px; }
+
+    /* ── 上一页/下一页 ── */
+    .pager {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 20px 40px 56px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .pager a {
+      display: block;
+      max-width: 48%;
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .pager a:hover { border-color: var(--primary); color: var(--primary); }
+    .pager .pager-label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 2px; }
+    .pager .pager-next { text-align: right; }
+
+    /* ── 窄屏:侧边栏折叠为顶部条，布局单列 ── */
+    @media (max-width: 900px) {
+      .layout { flex-direction: column; }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 14px 16px 10px;
+      }
+
+      .sidebar .brand { padding-bottom: 10px; margin-bottom: 6px; }
+
+      .sidebar .nav { flex-direction: row; flex-wrap: wrap; gap: 2px 6px; }
+
+      .sidebar .nav a { border-left: none; padding: 5px 12px; border-radius: 999px; }
+
+      .sidebar .nav a.active { border-left: none; background: #f2fbf6; }
+
+      .content { padding: 24px 20px 16px; }
+
+      .pager { padding: 16px 20px 40px; flex-wrap: wrap; }
+      .pager a { max-width: 100%; flex: 1 1 180px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="../index.html">
+        <img src="../icon.png" alt="Snowpub">Snowpub
+      </a>
+      <nav class="nav">
+        <a href="index.html" title="5 分钟跑通安装、配置、发布全流程">快速开始</a>
+        <a href="install.html" title="下载、系统要求、install.sh 与自动更新">安装与更新</a>
+        <a href="wechat.html" title="AppID/AppSecret、IP 白名单、测试连接">公众号接入</a>
+        <a href="publish.html" title="双栏编辑、微信预览、发布对话框、草稿箱">写作与发布</a>
+        <a href="cover.html" title="粘贴传图、素材库、智能封面三档比例" class="active">图片与封面</a>
+        <a href="faq.html" title="48001、连接失败、AI 助手、Git 同步">常见问题</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <article class="content">
+<h1>图片与封面</h1>
+<p>正文配图和文章封面是两条独立链路：配图跟着笔记走——编辑时只落本地，发布时才上传；封面走公众号永久素材。这一页讲清两条链路各自怎么工作，以及怎么配合。</p>
+<h2>粘贴 / 拖拽传图</h2>
+<p>在编辑器里直接粘贴（Cmd+V / Ctrl+V）图片或截图，或把图片文件拖进编辑器，png / jpg / gif / webp 都支持：</p>
+<ol>
+<li>图片自动存入笔记所在目录的 <code>imgs/</code> 子目录</li>
+<li>文件名取图片内容的 MD5 哈希前 16 位，同一张图反复粘贴只存一份——天然去重</li>
+<li>光标处插入相对路径引用，例如 <code>![](imgs/9f86d081884c7d65.png)</code></li>
+</ol>
+<p>编辑时图片只在本地磁盘上，不占公众号素材额度；点「保存草稿」时才统一上传微信 CDN，并把正文里的图片地址替换成 CDN 链接。笔记和 <code>imgs/</code> 目录放在一起，构成自包含的文章资产——Git 同步、备份、换电脑都随笔记目录整体迁移。</p>
+<div class="admonition tip">
+<p>不止 <code>imgs/</code>：正文里任何本地相对路径的图片（手动放进笔记目录的子文件夹也一样）都会在保存草稿时上传。外链图片地址则原样保留在正文里，不做转存。</p>
+</div>
+<h2>素材库</h2>
+<p>「图片素材库」浏览和管理公众号的永久图片素材，有两个入口：</p>
+<ul>
+<li>发布对话框的封面区（见下一节）</li>
+<li>图文（图片消息）模式的图片列表（可多选追加）</li>
+</ul>
+<p>素材库里的操作：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>上传图片</td>
+<td>选择本地文件（jpg / png / gif / webp）上传为公众号永久素材</td>
+</tr>
+<tr>
+<td>刷新素材</td>
+<td>拉取最新素材列表，每页 20 张，右上角显示已加载 / 总数</td>
+</tr>
+<tr>
+<td>点选卡片</td>
+<td>选中该素材作为封面（或追加到图文图片列表）</td>
+</tr>
+<tr>
+<td>删除</td>
+<td>删除素材，需二次确认</td>
+</tr>
+</tbody>
+</table>
+<h2>智能封面</h2>
+<h3>封面从哪来</h3>
+<p>打开发布对话框时，封面按下面的优先级自动建议：</p>
+<ol>
+<li>front matter 里声明的 <code>cover:</code>（本地相对路径或外链均可）</li>
+<li>正文的第一张图片</li>
+<li>内置默认封面（首次使用时自动上传到素材库并缓存，之后复用）</li>
+</ol>
+<p>都不满意就在封面区点「上传图片」即时上传，或点「图片素材库」从已有素材里挑一张。同一张封面图只上传一次：源文件没变（路径、修改时间、大小一致）时直接复用已上传的素材，换篇文章用同一张封面也不会重复上传。</p>
+<h3>三档封面比例</h3>
+<p>封面区下方的「封面比例」提供三档预设：</p>
+<table>
+<thead>
+<tr>
+<th>预设</th>
+<th>比例</th>
+<th>适用位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>头条 2.35:1</td>
+<td>900 × 383</td>
+<td>群发首条、分享卡片大图</td>
+</tr>
+<tr>
+<td>次条 1:1</td>
+<td>正方形</td>
+<td>群发第二条及以后</td>
+</tr>
+<tr>
+<td>原始</td>
+<td>不裁剪</td>
+<td>保留原图构图</td>
+</tr>
+</tbody>
+</table>
+<p>选「头条 2.35:1」或「次条 1:1」时，封面预览立即按所选比例居中裁切，所见即微信端的最终效果。</p>
+<h3>切比例不用重新上传</h3>
+<p>裁剪不在本地做：<strong>原图完整上传一次</strong>，所选比例换算成裁剪坐标（<code>cover_info</code>）随草稿一起提交给微信。之后切换比例只是改坐标，不重新上传图片，素材库里也不会出现裁剪副本。提交草稿后，在公众号后台编辑该草稿时仍可重新框选封面区域——Snowpub 提交的坐标只是初始建议。</p>
+<p>封面在发布流程里的位置见<a href="publish.html">写作与发布</a>——front matter 的写法与发布对话框的字段一一对应。</p>
+<hr>
+<p>下一步：<a href="faq.html">常见问题</a>——48001、连接失败、AI 助手与 Git 同步。</p>
+
+      </article>
+      <nav class="pager">
+        <a class="pager-prev" href="publish.html"><span class="pager-label">上一页</span>写作与发布</a>
+        <a class="pager-next" href="faq.html"><span class="pager-label">下一页</span>常见问题</a>
+      </nav>
+    </main>
+  </div>
+</body>
+</html>

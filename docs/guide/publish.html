@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>写作与发布 · Snowpub 文档</title>
+  <link rel="icon" type="image/png" href="../icon.png">
+  <meta name="description" content="双栏编辑、微信预览、发布对话框、草稿箱">
+  <meta property="og:title" content="写作与发布 · Snowpub 文档">
+  <meta property="og:description" content="双栏编辑、微信预览、发布对话框、草稿箱">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #07c160;
+      --primary-dark: #06ad56;
+      --text: #303133;
+      --muted: #606266;
+      --border: #e4e7ed;
+      --bg: #f5f7fa;
+      --code-bg: #282c34;
+      --code-fg: #abb2bf;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ── 布局:左 240px 粘性侧边栏 + 右内容列 ── */
+    .layout { display: flex; min-height: 100vh; align-items: flex-start; }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 240px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 20px;
+      margin-bottom: 10px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar .brand img { width: 28px; height: 28px; border-radius: 7px; }
+
+    .sidebar .nav { display: flex; flex-direction: column; }
+
+    .sidebar .nav a {
+      display: block;
+      padding: 8px 20px 8px 17px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar .nav a:hover { color: var(--primary); }
+
+    .sidebar .nav a.active {
+      color: var(--primary);
+      font-weight: 600;
+      border-left: 3px solid var(--primary);
+    }
+
+    .main { flex: 1; min-width: 0; background: #fff; }
+
+    /* ── 正文 ── */
+    .content { max-width: 760px; margin: 0 auto; padding: 48px 40px 24px; }
+
+    .content h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin: 8px 0 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .content h2 { font-size: 1.35rem; font-weight: 600; margin: 40px 0 14px; }
+    .content h3 { font-size: 1.12rem; font-weight: 600; margin: 28px 0 10px; }
+    .content p { margin: 14px 0; }
+    .content strong { font-weight: 600; }
+
+    .content ul, .content ol { margin: 14px 0; padding-left: 1.6em; }
+    .content li { margin: 5px 0; }
+
+    .content a { color: var(--primary); text-decoration: none; }
+    .content a:hover { text-decoration: underline; }
+
+    .content blockquote {
+      margin: 16px 0;
+      padding: 6px 18px;
+      border-left: 3px solid var(--border);
+      color: var(--muted);
+    }
+
+    .content hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+    .content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+    /* 行内代码 */
+    .content code {
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      color: #476582;
+    }
+
+    /* 代码块:深底浅字 */
+    .content pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 16px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
+      line-height: 1.6;
+    }
+
+    .content pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.875rem;
+    }
+
+    /* 表格:斑马纹 */
+    .content table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.95rem; }
+    .content th, .content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    .content th { background: var(--bg); font-weight: 600; }
+    .content tbody tr:nth-child(even) { background: #fafafa; }
+
+    /* ── 提示框（markdown-it-container 渲染目标）── */
+    .admonition { margin: 20px 0; padding: 12px 20px 14px; border-radius: 0 8px 8px 0; }
+    .admonition p { margin: 4px 0; }
+    .admonition.tip { border-left: 4px solid var(--primary); background: #f2fbf6; }
+    .admonition.tip::before { content: '提示'; display: block; font-weight: 600; font-size: 0.9rem; color: var(--primary); margin-bottom: 2px; }
+    .admonition.warning { border-left: 4px solid #e6a23c; background: #fdf6ec; }
+    .admonition.warning::before { content: '注意'; display: block; font-weight: 600; font-size: 0.9rem; color: #b88230; margin-bottom: 2px; }
+
+    /* ── 上一页/下一页 ── */
+    .pager {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 20px 40px 56px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .pager a {
+      display: block;
+      max-width: 48%;
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .pager a:hover { border-color: var(--primary); color: var(--primary); }
+    .pager .pager-label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 2px; }
+    .pager .pager-next { text-align: right; }
+
+    /* ── 窄屏:侧边栏折叠为顶部条，布局单列 ── */
+    @media (max-width: 900px) {
+      .layout { flex-direction: column; }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 14px 16px 10px;
+      }
+
+      .sidebar .brand { padding-bottom: 10px; margin-bottom: 6px; }
+
+      .sidebar .nav { flex-direction: row; flex-wrap: wrap; gap: 2px 6px; }
+
+      .sidebar .nav a { border-left: none; padding: 5px 12px; border-radius: 999px; }
+
+      .sidebar .nav a.active { border-left: none; background: #f2fbf6; }
+
+      .content { padding: 24px 20px 16px; }
+
+      .pager { padding: 16px 20px 40px; flex-wrap: wrap; }
+      .pager a { max-width: 100%; flex: 1 1 180px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="../index.html">
+        <img src="../icon.png" alt="Snowpub">Snowpub
+      </a>
+      <nav class="nav">
+        <a href="index.html" title="5 分钟跑通安装、配置、发布全流程">快速开始</a>
+        <a href="install.html" title="下载、系统要求、install.sh 与自动更新">安装与更新</a>
+        <a href="wechat.html" title="AppID/AppSecret、IP 白名单、测试连接">公众号接入</a>
+        <a href="publish.html" title="双栏编辑、微信预览、发布对话框、草稿箱" class="active">写作与发布</a>
+        <a href="cover.html" title="粘贴传图、素材库、智能封面三档比例">图片与封面</a>
+        <a href="faq.html" title="48001、连接失败、AI 助手、Git 同步">常见问题</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <article class="content">
+<h1>写作与发布</h1>
+<p>笔记写完后不用离开编辑器：双栏预览确认排版，一键存入公众号草稿箱，再决定发布。公众号 API 的准备工作（AppID、白名单）见<a href="wechat.html">公众号接入</a>。</p>
+<h2>双栏编辑与微信预览</h2>
+<p>打开 <code>.md</code> 笔记后，工具栏的三个视图按钮控制布局：「编辑」（只看源码）、「预览」（只看渲染效果）、「公众号」（双栏）。点「公众号」进入双栏模式：</p>
+<ul>
+<li><strong>左栏</strong>：CodeMirror Markdown 编辑器，语法高亮、自动折行</li>
+<li><strong>右栏</strong>：微信样式实时预览，左边每敲一个字，右边立刻刷新成公众号排版</li>
+</ul>
+<p><img src="img/editor-preview.png" alt="双栏编辑与微信预览"></p>
+<p>右栏顶部是「微信预览」工具栏：主题下拉框（下一节）和 📋「复制全文（带样式）」按钮（见文末「带样式复制」一节）。</p>
+<div class="admonition tip">
+<p>微信正文不保留超链接。预览和发布时，正文里的链接会自动转成文末的「参考链接」列表，读者通过文末地址访问原链接。</p>
+</div>
+<h2>主题：12 套内置 + 自定义</h2>
+<p>「微信预览」工具栏的下拉框切换排版主题，预览选什么主题，发布出去的就是什么排版。内置 12 套：</p>
+<p>微信绿（默认）、科技黑、活力橙、默认白、知乎蓝、中国红、墨色衬线、暖阳米白、莫兰迪、樱花粉、暗夜、青竹。</p>
+<p>自定义主题放进笔记本目录的 <code>themes/</code> 文件夹（<code>*.json</code>），启动时自动加载进同一个下拉框，显示名取 JSON 里的 <code>meta.displayName</code>。内置主题名不允许被同名文件覆盖。</p>
+<div class="admonition tip">
+<p>主题样式在渲染时全部内联到每个标签上——公众号编辑器只保留内联样式，这也是「带样式复制」粘贴过去不丢样式的原因。</p>
+</div>
+<h2>发布对话框</h2>
+<p>工具栏点「发布」按钮（纸飞机图标）打开发布对话框。还没配置公众号的话，点击会直接引导到「设置 → 公众号」。</p>
+<p><img src="img/publish-dialog.png" alt="发布对话框"></p>
+<p>对话框顶部的「类型」选择发布形态，默认「长文」（即常规公众号文章）。长文的字段：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标题</td>
+<td>上限 64 字，自动预填（来源见下一节）</td>
+</tr>
+<tr>
+<td>封面图</td>
+<td>本地上传或从素材库选择，详见<a href="cover.html">图片与封面</a></td>
+</tr>
+<tr>
+<td>作者</td>
+<td>上限 32 字，留空时用「设置 → 公众号」里的默认作者</td>
+</tr>
+<tr>
+<td>摘要</td>
+<td>上限 120 字，打开对话框自动预填正文前 120 字；清空后由微信取正文前 54 字</td>
+</tr>
+<tr>
+<td>原文链接</td>
+<td>可选，显示在文末「阅读原文」，需以 http(s):// 开头</td>
+</tr>
+<tr>
+<td>开启评论 / 仅粉丝可评论</td>
+<td>需公众号已开通留言功能</td>
+</tr>
+</tbody>
+</table>
+<p>底部四个按钮：「草稿箱」「取消」「保存草稿」「发布草稿」。发布流程分两步：</p>
+<ol>
+<li><strong>保存草稿</strong>——把文章（含正文配图、封面）上传到公众号草稿箱，提示「草稿已保存」</li>
+<li><strong>发布草稿</strong>——草稿保存后才可用；提交后显示「发布已提交，微信审核可能需要几分钟」，Snowpub 自动轮询状态，发布成功 / 失败 / 被拒绝都会在对话框里提示</li>
+</ol>
+<div class="admonition tip">
+<p>建议先「保存草稿」，到公众号后台确认排版和封面裁切无误后再「发布草稿」（或直接在后台发布）。</p>
+</div>
+<div class="admonition warning">
+<p>没有 API 发布权限的公众号（如个人订阅号）点「发布草稿」会返回 48001 错误。Snowpub 会记住这一状态：之后打开发布对话框自动禁用发布按钮、引导走「保存草稿 → 后台发布」流程，详见<a href="wechat.html">公众号接入</a>。</p>
+</div>
+<p>需要原创声明的文章：先存草稿，到公众号后台草稿箱里开启原创声明后再发布。</p>
+<h2>front matter 与文章结构</h2>
+<p>发布对话框的标题、作者等字段不用手填，笔记里声明一次即可。两种约定可以混用：</p>
+<p><strong>front matter</strong>——笔记头部用 <code>---</code> 包裹的元信息区：</p>
+<pre><code class="language-markdown">---
+title: 文章标题
+author: 作者名
+digest: 自定义摘要
+cover: images/cover.png
+source: https://example.com/original-post
+---
+</code></pre>
+<p><strong>「# 标题 + ## 内容」结构</strong>——H1 是标题，<code>## 内容</code> 之后是正文，两者之间的部分（元信息区）不进正文：</p>
+<pre><code class="language-markdown"># 文章标题
+
+这里放元信息区（日期、状态备注等），不会进入正文
+
+## 内容
+
+正文从这一行开始……
+</code></pre>
+<p>打开发布对话框时按优先级自动预填：标题 front matter <code>title</code> &gt; H1 &gt; 笔记文件名；作者 <code>author</code> &gt; 默认作者；摘要 <code>digest</code> &gt; 正文前 120 字自动生成；<code>cover</code> 和 <code>source</code> 分别对应封面图与原文链接。预览同样遵守这套结构——<code>## 内容</code> 之前的元信息不会渲染进正文。</p>
+<h2>图片消息（图文）</h2>
+<p>对话框顶部的「类型」切到「图文」，对应微信的<strong>图片消息</strong>（newspic）：以图片为主体的动态，适合一次发一组图配一段文字；「长文」则是读者熟悉的常规文章。两者字段差异：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>长文</th>
+<th>图文（图片消息）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主体</td>
+<td>Markdown 渲染的图文正文</td>
+<td>最多 20 张图片，首图即封面</td>
+</tr>
+<tr>
+<td>标题上限</td>
+<td>64 字</td>
+<td>20 字</td>
+</tr>
+<tr>
+<td>文字</td>
+<td>正文完整排版</td>
+<td>纯文本描述，上限 1000 字</td>
+</tr>
+</tbody>
+</table>
+<p>图片通过三个入口添加：「上传图片」（本地文件）、「图片素材库」（已有素材多选追加）、「从笔记收集」（自动扫描当前笔记里的本地图片逐一上传）。图片消息要求图片为公众号<strong>永久素材</strong>，这三个入口上传的都是永久素材。</p>
+<div class="admonition warning">
+<p>图片消息的标题和描述不支持 emoji 及部分特殊字符，微信会直接拒稿。保存时 Snowpub 检测到会列出这些字符，确认后自动移除再保存。</p>
+</div>
+<h2>草稿箱同步</h2>
+<p>发布对话框左下角的「草稿箱」打开草稿列表，和公众号后台看到的是同一份：</p>
+<ul>
+<li><strong>拉取草稿</strong>：刷新列表，显示封面、标题、作者、更新时间和摘要</li>
+<li>每条草稿可<strong>查看内容</strong>（弹窗预览）、<strong>发布草稿</strong>、<strong>删除草稿</strong></li>
+</ul>
+<p>在后台或手机上存的草稿也能拉回来直接发布，两端互不冲突。</p>
+<h2>带样式复制：个人号的备用路径</h2>
+<p>「预览」和「公众号」双栏的工具栏都有 📋「复制全文（带样式）」按钮：整篇按当前主题渲染、连同样式复制到剪贴板，粘贴到 <a href="https://mp.weixin.qq.com">mp.weixin.qq.com</a> 的编辑器里就是成品排版，改两笔即可群发。</p>
+<p>对没有 API 发布权限的个人订阅号，这是除「存草稿 → 后台发布」之外的另一条发布路径——完全绕开 48001 限制。</p>
+<hr>
+<p>下一步：<a href="cover.html">图片与封面</a>——粘贴传图的落盘规则、素材库与智能封面三档比例。</p>
+
+      </article>
+      <nav class="pager">
+        <a class="pager-prev" href="wechat.html"><span class="pager-label">上一页</span>公众号接入</a>
+        <a class="pager-next" href="cover.html"><span class="pager-label">下一页</span>图片与封面</a>
+      </nav>
+    </main>
+  </div>
+</body>
+</html>
