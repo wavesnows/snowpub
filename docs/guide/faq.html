@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>常见问题 · Snowpub 文档</title>
+  <link rel="icon" type="image/png" href="../icon.png">
+  <meta name="description" content="48001、连接失败、AI 助手、Git 同步">
+  <meta property="og:title" content="常见问题 · Snowpub 文档">
+  <meta property="og:description" content="48001、连接失败、AI 助手、Git 同步">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #07c160;
+      --primary-dark: #06ad56;
+      --text: #303133;
+      --muted: #606266;
+      --border: #e4e7ed;
+      --bg: #f5f7fa;
+      --code-bg: #282c34;
+      --code-fg: #abb2bf;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ── 布局:左 240px 粘性侧边栏 + 右内容列 ── */
+    .layout { display: flex; min-height: 100vh; align-items: flex-start; }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 240px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 20px;
+      margin-bottom: 10px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar .brand img { width: 28px; height: 28px; border-radius: 7px; }
+
+    .sidebar .nav { display: flex; flex-direction: column; }
+
+    .sidebar .nav a {
+      display: block;
+      padding: 8px 20px 8px 17px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar .nav a:hover { color: var(--primary); }
+
+    .sidebar .nav a.active {
+      color: var(--primary);
+      font-weight: 600;
+      border-left: 3px solid var(--primary);
+    }
+
+    .main { flex: 1; min-width: 0; background: #fff; }
+
+    /* ── 正文 ── */
+    .content { max-width: 760px; margin: 0 auto; padding: 48px 40px 24px; }
+
+    .content h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin: 8px 0 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .content h2 { font-size: 1.35rem; font-weight: 600; margin: 40px 0 14px; }
+    .content h3 { font-size: 1.12rem; font-weight: 600; margin: 28px 0 10px; }
+    .content p { margin: 14px 0; }
+    .content strong { font-weight: 600; }
+
+    .content ul, .content ol { margin: 14px 0; padding-left: 1.6em; }
+    .content li { margin: 5px 0; }
+
+    .content a { color: var(--primary); text-decoration: none; }
+    .content a:hover { text-decoration: underline; }
+
+    .content blockquote {
+      margin: 16px 0;
+      padding: 6px 18px;
+      border-left: 3px solid var(--border);
+      color: var(--muted);
+    }
+
+    .content hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+    .content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+    /* 行内代码 */
+    .content code {
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      color: #476582;
+    }
+
+    /* 代码块:深底浅字 */
+    .content pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 16px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
+      line-height: 1.6;
+    }
+
+    .content pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.875rem;
+    }
+
+    /* 表格:斑马纹 */
+    .content table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.95rem; }
+    .content th, .content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    .content th { background: var(--bg); font-weight: 600; }
+    .content tbody tr:nth-child(even) { background: #fafafa; }
+
+    /* ── 提示框（markdown-it-container 渲染目标）── */
+    .admonition { margin: 20px 0; padding: 12px 20px 14px; border-radius: 0 8px 8px 0; }
+    .admonition p { margin: 4px 0; }
+    .admonition.tip { border-left: 4px solid var(--primary); background: #f2fbf6; }
+    .admonition.tip::before { content: '提示'; display: block; font-weight: 600; font-size: 0.9rem; color: var(--primary); margin-bottom: 2px; }
+    .admonition.warning { border-left: 4px solid #e6a23c; background: #fdf6ec; }
+    .admonition.warning::before { content: '注意'; display: block; font-weight: 600; font-size: 0.9rem; color: #b88230; margin-bottom: 2px; }
+
+    /* ── 上一页/下一页 ── */
+    .pager {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 20px 40px 56px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .pager a {
+      display: block;
+      max-width: 48%;
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .pager a:hover { border-color: var(--primary); color: var(--primary); }
+    .pager .pager-label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 2px; }
+    .pager .pager-next { text-align: right; }
+
+    /* ── 窄屏:侧边栏折叠为顶部条，布局单列 ── */
+    @media (max-width: 900px) {
+      .layout { flex-direction: column; }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 14px 16px 10px;
+      }
+
+      .sidebar .brand { padding-bottom: 10px; margin-bottom: 6px; }
+
+      .sidebar .nav { flex-direction: row; flex-wrap: wrap; gap: 2px 6px; }
+
+      .sidebar .nav a { border-left: none; padding: 5px 12px; border-radius: 999px; }
+
+      .sidebar .nav a.active { border-left: none; background: #f2fbf6; }
+
+      .content { padding: 24px 20px 16px; }
+
+      .pager { padding: 16px 20px 40px; flex-wrap: wrap; }
+      .pager a { max-width: 100%; flex: 1 1 180px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="../index.html">
+        <img src="../icon.png" alt="Snowpub">Snowpub
+      </a>
+      <nav class="nav">
+        <a href="index.html" title="5 分钟跑通安装、配置、发布全流程">快速开始</a>
+        <a href="install.html" title="下载、系统要求、install.sh 与自动更新">安装与更新</a>
+        <a href="wechat.html" title="AppID/AppSecret、IP 白名单、测试连接">公众号接入</a>
+        <a href="publish.html" title="双栏编辑、微信预览、发布对话框、草稿箱">写作与发布</a>
+        <a href="cover.html" title="粘贴传图、素材库、智能封面三档比例">图片与封面</a>
+        <a href="faq.html" title="48001、连接失败、AI 助手、Git 同步" class="active">常见问题</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <article class="content">
+<h1>常见问题</h1>
+<p>按「连接 → 发布 → AI → 同步 → 数据」的使用顺序排列，问题标题就是你会搜的原句。没找到答案？文末有求助渠道。</p>
+<h2>「测试连接」失败怎么排查？</h2>
+<p>按从易到难的顺序过一遍，绝大多数问题出在前两步：</p>
+<ol>
+<li><strong>AppID / AppSecret 抄错了。</strong> 从公众号后台复制时多带了空格、或 Secret 粘贴成了旧值，逐字核对一遍再试。</li>
+<li><strong>AppSecret 重置过，Snowpub 里还是旧值。</strong> 微信侧重置后旧 Secret <strong>立即失效</strong>，回 设置 → 公众号 更新为新值。</li>
+<li><strong>本机公网 IP 不在白名单。</strong> 换网络环境（家里 → 咖啡馆 → 公司）IP 就会变。浏览器打开 <a href="https://www.ipip.net">ipip.net</a> 或百度搜「IP」查当前 IP，加进公众号后台的 IP 白名单。</li>
+<li><strong>白名单刚改还没生效。</strong> 微信侧有短暂延迟，等一两分钟再点「测试连接」。</li>
+<li><strong>公司网络 NAT 出口 IP 不固定。</strong> 每次请求可能从不同出口 IP 发出，需要把出口 IP 段都加白，联系网络管理员要出口 IP 列表。</li>
+</ol>
+<p>各项配置的位置见<a href="wechat.html">公众号接入</a>。</p>
+<h2>发布时提示 48001 错误怎么办？</h2>
+<p>48001 表示个人订阅号没有 API 发布权限——这是微信对个人号的限制，不是你的配置出了问题。Snowpub 的对策是<strong>先存草稿、再手动发布</strong>：</p>
+<ul>
+<li>Snowpub 检测到 48001 后会记住这个状态，之后默认引导你存草稿</li>
+<li>存草稿不受 48001 限制——草稿接口个人号可以正常使用</li>
+<li>草稿存好后在公众号后台 → 草稿箱发布，或在手机上用「订阅号助手」App 发布</li>
+</ul>
+<p>各主体类型的能力边界见<a href="wechat.html">公众号接入</a>。</p>
+<h2>AI 助手检测不到我装好的 CLI 怎么办？</h2>
+<p>侧边栏「AI 助手」页签会自动检测本机已装的 agent CLI（Claude Code / OpenCode / OpenClaw），检测不到通常是三种情况：</p>
+<ol>
+<li><strong>没装。</strong> 切到该 CLI 时面板会显示对应的安装命令，例如 Claude Code 是 <code>npm install -g @anthropic-ai/claude-code</code>，在终端执行即可。</li>
+<li><strong>装了，但 Snowpub 看不到。</strong> GUI 应用不继承终端 shell 的 PATH——终端里能跑、Snowpub 检测不到，基本就是这个原因。先在终端执行 <code>which claude</code> 确认装到了哪里，再回 Snowpub 重试第 3 步。</li>
+<li><strong>装完没有重新检测。</strong> 检测在启动时和面板打开时执行，装完新 CLI 点 AI 助手页签右上角的「重新检测」按钮，或重启 Snowpub。</li>
+</ol>
+<h2>AI 助手收费吗？API key 填在哪里？</h2>
+<p>不用在 Snowpub 里填任何 key。AI 助手是 <strong>BYOA</strong>（Bring Your Own Agent）模式：Snowpub 不内置模型、不代管 API key，调用的是你本机已登录的 agent CLI——<strong>token 走你自己 CLI 的账号，费用自付</strong>。</p>
+<p>预设动作四个：润色（选中文字或全文）、起标题（5 个备选）、写摘要（120 字以内）、生成主题（AI 产出整套 <code>theme.json</code>）。回复点「插入光标处」即可一键回插编辑器。</p>
+<h2>Git 同步的 Token 需要什么权限？会被上传吗？</h2>
+<p>在 设置 → 同步 配置 GitHub 或 Gitee 的用户名 + Token：</p>
+<ul>
+<li><strong>GitHub</strong>：Personal Access Token（classic）勾选 <code>repo</code> 权限</li>
+<li><strong>Gitee</strong>：私人令牌</li>
+</ul>
+<div class="admonition tip">
+<p>Token 只存在本地（electron-store），除了你自己的 GitHub / Gitee 仓库不经过任何服务器。添加远程笔记本时既可以克隆已有仓库，也可以让 Snowpub 新建一个。</p>
+</div>
+<h2>我的笔记存在哪里？会被上传吗？</h2>
+<p>笔记是磁盘上的<strong>普通 Markdown 文件</strong>，笔记本目录由你自己选择——任何时候都能用任何编辑器打开，卸载 Snowpub 数据也还在。</p>
+<p>写作全程本地，不上传任何服务器。只有两类操作出网：发布时调用微信官方 API（草稿 / 素材 / 发布），以及 Git 同步时连接你自己的仓库。AppID / AppSecret / Token 等凭据同样只存本地。</p>
+<h2>还有问题没解决？</h2>
+<p>到 <a href="https://github.com/wavesnows/snowpub/issues">GitHub Issues</a> 提一个 issue，附上错误提示和复现步骤，方便快速定位。</p>
+
+      </article>
+      <nav class="pager">
+        <a class="pager-prev" href="cover.html"><span class="pager-label">上一页</span>图片与封面</a>
+        <span class="pager-empty"></span>
+      </nav>
+    </main>
+  </div>
+</body>
+</html>

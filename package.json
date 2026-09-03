@@ -12,7 +12,8 @@
     "build": "vite build && electron-builder",
     "build:check": "vue-tsc --noEmit && vite build && electron-builder",
     "postinstall": "electron-builder install-app-deps",
-    "theme:samples": "npx esbuild scripts/render-theme-sample.ts --bundle --format=esm --platform=node --outfile=node_modules/.cache/render-theme-sample.mjs && node node_modules/.cache/render-theme-sample.mjs"
+    "theme:samples": "npx esbuild scripts/render-theme-sample.ts --bundle --format=esm --platform=node --outfile=node_modules/.cache/render-theme-sample.mjs && node node_modules/.cache/render-theme-sample.mjs",
+    "docs:build": "npx esbuild docs/guide-src/build-docs.ts --bundle --format=esm --platform=node --outfile=node_modules/.cache/build-docs.mjs && node node_modules/.cache/build-docs.mjs"
   },
   "engines": {
     "node": ">=14.17.0"
@@ -26,6 +27,7 @@
     "@vitejs/plugin-vue": "^2.3.3",
     "electron": "^24.1.2",
     "electron-builder": "^24.2.1",
+    "markdown-it-container": "^4.0.0",
     "typescript": "^4.7.4",
     "vite": "^2.9.13",
     "vite-plugin-electron": "^0.8.1",
