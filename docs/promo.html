@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snowpub — 写公众号，用 Markdown 就够了</title>
+  <meta name="description" content="开源免费的公众号写作与发布工具：本地 Markdown 写作、12 套微信主题、图片自动上传、一键发布。" />
+  <meta property="og:title" content="Snowpub — 写公众号，用 Markdown 就够了" />
+  <meta property="og:description" content="开源免费 · 本地写作 · 12 套微信主题 · 图片自动上传 · 一键发布到公众号" />
+  <meta property="og:image" content="https://snowpub.wavesnows.com/icon.png" />
+  <meta property="og:url" content="https://snowpub.wavesnows.com/promo.html" />
+  <link rel="icon" type="image/png" href="icon.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #07c160;
+      --primary-dark: #06ad56;
+      --text: #303133;
+      --ink: #1A3C34;
+      --muted: #606266;
+      --border: #e4e7ed;
+      --bg: #f5f7fa;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.7;
+    }
+
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+
+    /* ── Top bar ── */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .topbar .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--ink); }
+    .topbar .brand img { width: 26px; height: 26px; border-radius: 6px; }
+    .topbar a.link { color: var(--muted); text-decoration: none; font-size: 0.9rem; margin-left: 16px; }
+    .topbar a.link:hover { color: var(--primary); }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #F2FBF6 0%, #FFFFFF 100%);
+      padding: 56px 20px 48px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 2.1rem;
+      color: var(--ink);
+      letter-spacing: 1px;
+      line-height: 1.35;
+      margin-bottom: 14px;
+    }
+    .hero .sub { color: var(--muted); font-size: 1.05rem; max-width: 560px; margin: 0 auto 28px; }
+    .hero .sub b { color: var(--ink); }
+    .badges { margin-bottom: 28px; }
+    .badges span {
+      display: inline-block;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 3px 4px;
+    }
+    .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-block;
+      padding: 13px 30px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: all .2s;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { border-color: var(--primary); color: var(--primary); background: #fff; }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+
+    /* ── Sections ── */
+    section { padding: 52px 0; }
+    section.gray { background: var(--bg); }
+    .sec-title { font-size: 1.5rem; color: var(--ink); text-align: center; margin-bottom: 8px; }
+    .sec-sub { text-align: center; color: var(--muted); font-size: 0.95rem; margin-bottom: 32px; }
+
+    /* ── Pain cards ── */
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .pain-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 18px;
+    }
+    .pain-card .emoji { font-size: 1.5rem; display: block; margin-bottom: 8px; }
+    .pain-card b { display: block; color: var(--ink); margin-bottom: 4px; }
+    .pain-card p { font-size: 0.9rem; color: var(--muted); }
+
+    /* ── Show ── */
+    .show-img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.10);
+      display: block;
+      margin-bottom: 28px;
+    }
+    .points { max-width: 640px; margin: 0 auto; }
+    .points li {
+      list-style: none;
+      padding: 10px 0 10px 34px;
+      position: relative;
+      border-bottom: 1px dashed var(--border);
+    }
+    .points li:last-child { border-bottom: none; }
+    .points li::before {
+      content: "✓";
+      position: absolute;
+      left: 4px;
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .points b { color: var(--ink); }
+
+    /* ── Themes ── */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .theme-grid img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      display: block;
+    }
+
+    /* ── Chips ── */
+    .chips { text-align: center; max-width: 720px; margin: 0 auto; }
+    .chips span {
+      display: inline-block;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 0.9rem;
+      color: var(--text);
+      margin: 4px;
+    }
+
+    /* ── Download ── */
+    #dl-version { color: var(--muted); font-size: 0.9rem; text-align: center; margin-bottom: 20px; }
+    .dl-note { text-align: center; margin-top: 18px; font-size: 0.85rem; color: var(--muted); }
+    .dl-note code { background: #eef1f4; padding: 2px 8px; border-radius: 4px; font-size: 0.82rem; }
+    .dl-note a { color: var(--primary); text-decoration: none; }
+    #download-mobile { text-align: center; }
+    #download-mobile p { color: var(--muted); margin-bottom: 18px; }
+
+    /* ── Group ── */
+    .group-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px 24px;
+      text-align: center;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .group-card img {
+      width: 180px;
+      height: 180px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .group-card .qq-no { font-size: 1.1rem; font-weight: 700; color: var(--ink); margin: 14px 0 16px; }
+
+    /* ── Footer ── */
+    footer { padding: 28px 0; text-align: center; font-size: 0.85rem; color: var(--muted); }
+    footer a { color: var(--primary); text-decoration: none; }
+
+    @media (max-width: 560px) {
+      .hero { padding: 44px 16px 40px; }
+      .hero h1 { font-size: 1.65rem; }
+      section { padding: 40px 0; }
+      .pain-grid { grid-template-columns: 1fr; }
+      .btn { padding: 12px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand"><img src="icon.png" alt="Snowpub" />Snowpub</div>
+    <div>
+      <a class="link" href="index.html">官网</a>
+      <a class="link" href="https://github.com/wavesnows/snowpub">GitHub</a>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero" style="padding-top:32px">
+    <h1>写公众号，用 Markdown 就够了</h1>
+    <p class="sub"><b>Snowpub</b> · 本地优先的公众号写作与发布工具。<br/>排版、传图、发布，一次搞定。</p>
+    <div class="badges">
+      <span>开源免费 MIT</span>
+      <span>数据全在本地</span>
+      <span>macOS · Windows</span>
+    </div>
+    <div class="cta-row">
+      <a href="#download" class="btn btn-primary">免费下载</a>
+      <a href="https://github.com/wavesnows/snowpub" class="btn btn-outline">⭐ GitHub</a>
+    </div>
+  </section>
+
+  <!-- Pain -->
+  <section class="gray">
+    <div class="wrap">
+      <h2 class="sec-title">这些崩溃瞬间，你中过几个？</h2>
+      <p class="sec-sub">写公众号的人，多少都被排版折磨过</p>
+      <div class="pain-grid">
+        <div class="pain-card">
+          <span class="emoji">🎨</span>
+          <b>排版白干</b>
+          <p>编辑器里调了半天样式，粘到公众号后台全乱了，只能重来。</p>
+        </div>
+        <div class="pain-card">
+          <span class="emoji">💻</span>
+          <b>代码糊了</b>
+          <p>技术文章的代码块，一到公众号就丢高亮、没缩进，没法看。</p>
+        </div>
+        <div class="pain-card">
+          <span class="emoji">🖼️</span>
+          <b>传图繁琐</b>
+          <p>插图得先传素材库，再一张张翻出来插入，一篇文章来回几十次。</p>
+        </div>
+        <div class="pain-card">
+          <span class="emoji">☁️</span>
+          <b>文章不在自己手里</b>
+          <p>全文存在云端编辑器，迁移、备份、找回，处处受制。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Show -->
+  <section>
+    <div class="wrap">
+      <h2 class="sec-title">在本地写，所见即所得，一键发布</h2>
+      <p class="sec-sub">左边写 Markdown，右边实时渲染微信样式</p>
+      <img class="show-img" src="Screenshot.png" alt="Snowpub 界面截图" />
+      <ul class="points">
+        <li><b>所写即所见</b>——发出去什么样，写的时候就是什么样，不再开盲盒</li>
+        <li><b>12 套主题一键切换</b>——换主题不动一个字，代码块样式跟主题走</li>
+        <li><b>图片粘贴即存</b>——写作时直接粘贴/拖拽，发布时自动上传微信，不碰素材库</li>
+        <li><b>一键发布</b>——草稿、发布直达公众号后台，外链自动转底部引用</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Themes -->
+  <section class="gray">
+    <div class="wrap">
+      <h2 class="sec-title">12 套主题，一键切换</h2>
+      <p class="sec-sub">真实渲染效果，不止换色——每套都有自己的版式性格</p>
+      <div class="theme-grid">
+        <img src="theme-samples/png/wechat-green.png" alt="微信绿主题" loading="lazy" />
+        <img src="theme-samples/png/wechat-serif.png" alt="衬线主题" loading="lazy" />
+        <img src="theme-samples/png/wechat-morandi.png" alt="莫兰迪主题" loading="lazy" />
+        <img src="theme-samples/png/wechat-black.png" alt="暗夜主题" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <!-- More -->
+  <section>
+    <div class="wrap">
+      <h2 class="sec-title">还有更多</h2>
+      <p class="sec-sub">一个顺手的写作环境该有的，都在</p>
+      <div class="chips">
+        <span>🤖 AI 助手：润色 / 起标题 / 写摘要 / 生成主题</span>
+        <span>🖼 智能封面</span>
+        <span>📮 图文 + 贴图发布</span>
+        <span>🔄 Git 同步</span>
+        <span>🕘 版本历史</span>
+        <span>🔍 全文搜索</span>
+        <span>⌨️ 内置终端</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download -->
+  <section class="gray" id="download">
+    <div class="wrap">
+      <div id="download-desktop">
+        <h2 class="sec-title">免费下载</h2>
+        <p id="dl-version">正在获取最新版本…</p>
+        <div class="cta-row">
+          <a id="dl-mac-arm64" href="https://github.com/wavesnows/snowpub/releases/latest" class="btn btn-primary">macOS · Apple 芯片</a>
+          <a id="dl-mac-x64" href="https://github.com/wavesnows/snowpub/releases/latest" class="btn btn-primary">macOS · Intel</a>
+          <a id="dl-win" href="https://github.com/wavesnows/snowpub/releases/latest" class="btn btn-outline">Windows</a>
+        </div>
+        <p class="dl-note">macOS 首次打开如遇「已损坏」：<code>xattr -cr /Applications/Snowpub.app</code> · <a href="index.html#download">官网完整安装说明</a></p>
+      </div>
+      <div id="download-mobile" style="display:none">
+        <h2 class="sec-title">Snowpub 是电脑软件</h2>
+        <p>支持 macOS 和 Windows。<br/>可以先 Star 收藏，回到电脑上下载——或者进群聊聊。</p>
+        <div class="cta-row">
+          <a href="https://github.com/wavesnows/snowpub" class="btn btn-primary">⭐ 去 GitHub 收藏</a>
+          <a href="#group" class="btn btn-outline">加交流群</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Group -->
+  <section id="group">
+    <div class="wrap">
+      <h2 class="sec-title">有问题？进群聊</h2>
+      <p class="sec-sub">问题反馈、主题分享、更新通知</p>
+      <div class="group-card">
+        <img src="qq-group.jpg" alt="Snowpub QQ 交流群二维码" />
+        <div class="qq-no">QQ 群 1121242452</div>
+        <a class="btn btn-primary" href="https://qm.qq.com/q/TWpaXmxqcU">一键加群</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Snowpub</b> · MIT © <a href="https://github.com/wavesnows">wavesnows</a> · <a href="index.html">官网首页</a> · <a href="https://github.com/wavesnows/snowpub">GitHub</a></p>
+  </footer>
+
+  <script>
+    var isMobile = /Android|iPhone|iPad|HarmonyOS|Mobile/i.test(navigator.userAgent);
+    if (isMobile) {
+      document.getElementById('download-desktop').style.display = 'none';
+      document.getElementById('download-mobile').style.display = 'block';
+    } else {
+      fetch('https://api.github.com/repos/wavesnows/snowpub/releases/latest')
+        .then(function (r) { return r.json(); })
+        .then(function (rel) {
+          document.getElementById('dl-version').textContent =
+            '最新版本 ' + rel.tag_name + ' · 发布于 ' + rel.published_at.slice(0, 10);
+          rel.assets.forEach(function (a) {
+            var url = a.browser_download_url;
+            if (a.name.endsWith('.dmg') && a.name.includes('arm64'))
+              document.getElementById('dl-mac-arm64').href = url;
+            else if (a.name.endsWith('.dmg') && !a.name.includes('arm64'))
+              document.getElementById('dl-mac-x64').href = url;
+            else if (a.name.endsWith('.exe'))
+              document.getElementById('dl-win').href = url;
+          });
+        })
+        .catch(function () {
+          document.getElementById('dl-version').textContent = '支持 macOS 和 Windows';
+        });
+    }
+  </script>
+
+</body>
+</html>
