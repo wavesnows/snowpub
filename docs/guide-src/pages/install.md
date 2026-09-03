@@ -31,7 +31,7 @@ xattr -cr /Applications/Snowpub.app
 
 ## Windows 安装
 
-双击 `.exe` 安装程序，按向导完成安装。安装目录可以自定义，卸载时不会删除你的笔记数据。
+双击 `.exe` 即完成安装（默认安装到用户目录），卸载时不会删除你的笔记数据。
 
 ## `install.sh` 一键安装（可选）
 

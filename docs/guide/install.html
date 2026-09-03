@@ -264,7 +264,7 @@
 </code></pre>
 <p>然后重新双击打开即可。这是移除 macOS 对未签名应用的隔离标记，只需执行一次。</p>
 <h2>Windows 安装</h2>
-<p>双击 <code>.exe</code> 安装程序，按向导完成安装。安装目录可以自定义，卸载时不会删除你的笔记数据。</p>
+<p>双击 <code>.exe</code> 即完成安装（默认安装到用户目录），卸载时不会删除你的笔记数据。</p>
 <h2><code>install.sh</code> 一键安装（可选）</h2>
 <p>如果你克隆了仓库并在本地构建过，可以用根目录的 <code>install.sh</code> 一键完成安装：脚本自动检测芯片类型（Apple Silicon / Intel），挂载 <code>release/</code> 目录下对应的 DMG，把应用复制到 <code>/Applications</code>，并顺手移除隔离属性。</p>
 <pre><code class="language-bash">./install.sh
