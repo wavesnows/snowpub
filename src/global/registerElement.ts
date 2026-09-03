@@ -37,6 +37,12 @@ import {
   // 发布对话框在用但此前漏注册：el-checkbox（评论开关）、el-alert（publishBlocked 提示）
   ElCheckbox,
   ElAlert,
+  // 其他在用但此前漏注册：el-empty（搜索空态/版本历史）、el-timeline（版本历史）、el-card（版本历史）、el-link（AI 面板安装横幅）
+  ElEmpty,
+  ElTimeline,
+  ElTimelineItem,
+  ElCard,
+  ElLink,
   // v-loading 指令（草稿箱/素材库/发布表单的加载遮罩）
   ElLoading
 } from "element-plus";
@@ -96,6 +102,12 @@ const components = [
 
   ElCheckbox,
   ElAlert,
+
+  ElEmpty,
+  ElTimeline,
+  ElTimelineItem,
+  ElCard,
+  ElLink,
 ];
 
 export default function (app: any) {
