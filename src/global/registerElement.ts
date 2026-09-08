@@ -13,8 +13,6 @@ import {
   ElSelectV2,
   ElSkeletonItem,
   ElMenuItem,
-  ElMessage,
-  ElMessageBox,
   ElTable,
   ElTag,
   ElTree,
@@ -50,6 +48,8 @@ import "element-plus/dist/index.css";
 import "element-plus/theme-chalk/display.css";
 import * as Icons from "@element-plus/icons-vue";
 
+// Register renderable components only. Service function names can be minified
+// to native tags (e.g. ElMessage -> Ul), shadowing dynamic HTML elements.
 const components = [
   ElContainer,
   ElContainer.Header,
@@ -75,9 +75,6 @@ const components = [
   ElSelect.Option,
   ElSlider,
   ElTooltip,
-  ElMenu,
-  ElMenu.MenuItem,
-  ElMessage,
 
   ElTable,
   ElTable.TableColumn,
