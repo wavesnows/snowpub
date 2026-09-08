@@ -41,9 +41,12 @@ const handleKeyDown = (event: KeyboardEvent) => {
 };
 
 const handleFocus = () => {
-  // Emit event so FileTree can save expanded state before refresh
-  window.dispatchEvent(new CustomEvent('save-tree-expanded-state'));
   ttsStore.scheduleTreeRefresh();
+};
+
+const flushPreferences = () => {
+  ttsStore.setLastEditNote();
+  ttsStore.flushPendingPreferences();
 };
 
 // ── Auto-update notifications ──────────────────────────────────────────────
@@ -129,6 +132,7 @@ onMounted(() => {
   ttsStore.buildFlatFileList();
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('focus', handleFocus);
+  window.addEventListener('beforeunload', flushPreferences);
 
   // Get git availability from main process
   ipcRenderer.invoke('get-git-available').then((available: boolean) => {
@@ -151,8 +155,8 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown);
   window.removeEventListener('focus', handleFocus);
-  window.dispatchEvent(new CustomEvent('save-tree-expanded-state'));
-  ttsStore.setLastEditNote();
+  window.removeEventListener('beforeunload', flushPreferences);
+  flushPreferences();
   if (autoPullTimer) clearInterval(autoPullTimer)
   ipcRenderer.removeListener('updater:available', onUpdateAvailable);
   ipcRenderer.removeListener('updater:progress', onUpdateProgress);

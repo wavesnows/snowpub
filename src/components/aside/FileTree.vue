@@ -8,17 +8,16 @@
         class="filter-input"
       />
     </div>
-    <el-scrollbar height="100%" width="100%" tabindex="0" @keydown.capture="handleTreeKeydown">
+    <el-scrollbar height="100%" width="100%" tabindex="0" @keydown.capture="handleTreeKeydown" @scroll="closeMenu()">
     <el-tree
       :data="treeMenu.data"
       @node-click="handleNodeClick"
-      @loadNode=" loadHandler"
       class="treemenu"
       node-key="path"
       :expand-on-click-node="false"
       :indent="5"
       :filter-node-method="filterNode"
-      @node-contextmenu="showItemMenu "
+      @node-contextmenu="openContextMenu"
       :default-expanded-keys="expandedKeys"
       @node-expand="onNodeExpand"
       @node-collapse="onNodeCollapse"
@@ -28,7 +27,6 @@
         <div
           class="custom-tree-node"
           :class="{ 'keyboard-focused': data.path === focusedNodeKey }"
-          @contextmenu.prevent="handleContextMenu(node, $event)"
         >
           <input
             v-if="editingPath === data.path"
@@ -39,14 +37,9 @@
             @blur="confirmRename(data)"
             ref="renameInputRef"
           />
-          <el-tooltip
-            v-else
-            :content="node.label"
-            placement="right"
-            :show-after="800"
-            :hide-after="0"
-          >
             <span
+              v-else
+              :title="node.label"
               class="el-dropdown-link"
               @dblclick.stop="startRename(data)"
             >
@@ -60,80 +53,69 @@
               </span>
               {{ node.label }}
             </span>
-          </el-tooltip>
-          <span class="node-actions">
+          <span class="node-actions" @click.stop @dblclick.stop>
             <!-- Star icon for favorites -->
             <el-icon
-              v-if="!node.data.isFolder && ttsStore.isStarred(node.data.path)"
+              v-if="!node.data.isFolder && starredPaths.has(node.data.path)"
               class="star-icon"
               color="#f7ba2a">
               <StarFilled />
             </el-icon>
-            <el-dropdown  @command="handleCommand" trigger="click">
-             <a class="icon-add" >⚙︎</a>
+            <button type="button" class="icon-add" aria-haspopup="menu"
+              :aria-label="node.label + ' 操作菜单'"
+              @click="openMenu(data, node, $event)">⚙︎</button>
+          </span>
+
+          </div>
+
+      </template>
+
+    </el-tree>
+    </el-scrollbar>
+
+    <el-dropdown v-if="activeMenu" ref="menuRef" trigger="click" placement="bottom-start"
+      :hide-timeout="0" :style="{ position: 'fixed', left: menuPosition.x + 'px', top: menuPosition.y + 'px' }"
+      @command="handleCommand" @visible-change="onMenuVisibility">
+      <span class="menu-anchor" tabindex="-1" aria-hidden="true"></span>
               <template #dropdown>
-              <el-dropdown-menu class="tree-context-menu">
-                <el-dropdown-item v-if="node.data.isFolder" :command="{type:'mdfile', data:data}">
+              <el-dropdown-menu ref="menuListRef" class="tree-context-menu" @keydown.esc.stop="closeMenu(true)">
+                <el-dropdown-item v-if="activeMenu.data.isFolder" :command="{type:'mdfile', data:activeMenu.data}">
                   <el-icon><Document /></el-icon>
                   <span>{{ t('fileTree.createMdFile') }}</span>
                 </el-dropdown-item>
-                <el-dropdown-item v-if="node.data.isFolder" :command="{type:'demo', data:data}">
+                <el-dropdown-item v-if="activeMenu.data.isFolder" :command="{type:'demo', data:activeMenu.data}">
                   <el-icon><Document /></el-icon>
                   <span>{{ t('fileTree.createDemoNote') }}</span>
                 </el-dropdown-item>
-                <el-dropdown-item v-if="node.data.isFolder" :command="{type:'folder', data:data}">
+                <el-dropdown-item v-if="activeMenu.data.isFolder" :command="{type:'folder', data:activeMenu.data}">
                   <el-icon><Folder /></el-icon>
                   <span>{{ t('fileTree.createFolder') }}</span>
                 </el-dropdown-item>
-                <el-dropdown-item v-if="node.data.isFolder" :command="{type:'remove', data:data, node:node}" divided>
+                <el-dropdown-item v-if="activeMenu.data.isFolder" :command="{type:'remove', data:activeMenu.data, node:activeMenu.node}" divided>
                   <el-icon><Delete /></el-icon>
                   <span>{{ t('fileTree.remove') }}</span>
                 </el-dropdown-item>
-                <el-dropdown-item v-if="!node.data.isFolder" :command="{type:'pin', data:data}">
-                  <el-icon v-if="ttsStore.isPinned(data.path)"><RemoveFilled /></el-icon>
+                <el-dropdown-item v-if="!activeMenu.data.isFolder" :command="{type:'pin', data:activeMenu.data}">
+                  <el-icon v-if="ttsStore.isPinned(activeMenu.data.path)"><RemoveFilled /></el-icon>
                   <el-icon v-else><Position /></el-icon>
-                  <span>{{ ttsStore.isPinned(data.path) ? t('fileTree.unpinNote') : t('fileTree.pinNote') }}</span>
+                  <span>{{ ttsStore.isPinned(activeMenu.data.path) ? t('fileTree.unpinNote') : t('fileTree.pinNote') }}</span>
                 </el-dropdown-item>
-                <el-dropdown-item v-if="!node.data.isFolder" :command="{type:'star', data:data}">
-                  <el-icon v-if="ttsStore.isStarred(data.path)"><StarFilled /></el-icon>
+                <el-dropdown-item v-if="!activeMenu.data.isFolder" :command="{type:'star', data:activeMenu.data}">
+                  <el-icon v-if="ttsStore.isStarred(activeMenu.data.path)"><StarFilled /></el-icon>
                   <el-icon v-else><Star /></el-icon>
-                  <span>{{ ttsStore.isStarred(data.path) ? t('fileTree.removeStar') : t('fileTree.addStar') }}</span>
+                  <span>{{ ttsStore.isStarred(activeMenu.data.path) ? t('fileTree.removeStar') : t('fileTree.addStar') }}</span>
                 </el-dropdown-item>
-                <el-dropdown-item :command="{type:'showInFinder', data:data}" divided>
+                <el-dropdown-item :command="{type:'showInFinder', data:activeMenu.data}" divided>
                   <el-icon><FolderOpened /></el-icon>
                   <span>{{ t('fileTree.showInFinder') }}</span>
                 </el-dropdown-item>
-                <el-dropdown-item v-if="!node.data.isFolder" :command="{type:'removeitem', data:data, node:node}">
+                <el-dropdown-item v-if="!activeMenu.data.isFolder" :command="{type:'removeitem', data:activeMenu.data, node:activeMenu.node}">
                   <el-icon><Delete /></el-icon>
                   <span>{{ t('fileTree.remove') }}</span>
                 </el-dropdown-item>
               </el-dropdown-menu>
               </template>
-            </el-dropdown>
-          </span>
-          
-          <!-- <el-dropdown v-if="dropdownVisible" :style="{ position: 'fixed', top: `${dropdownPosition.y}px`, left: `${dropdownPosition.x}px` }">
-              <span class="el-dropdown-link">{{ node.label }}</span>
-              <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click.native="handleDropdownItemClick">菜单项</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-            </el-dropdown>-->
-           
-            <!--  <el-popconfirm
-              confirm-button-text="Yes" cancel-button-text="No" :icon="InfoFilled" icon-color="#626AEF"
-              title="Are you sure to delete this?" @confirm="remove(node, data)" @cancel="cancelEvent" >
-              <template #reference>
-                <a v-if="!node.data.isFolder" class="icon-remove" >✗</a>
-              </template>
-            </el-popconfirm> -->
-          </div>
-       
-      </template>
-    
-    </el-tree>
-    </el-scrollbar>
+    </el-dropdown>
 
     <el-dialog v-model="dialogFormVisible" :title="t('dialog.typeFolderName')">
     <el-form :model="ttsStore.menu">
@@ -154,23 +136,22 @@
 import fs from 'fs'
 import {join, dirname} from "path"
 import { storeToRefs } from "pinia"
-import {ref, watch, nextTick, getCurrentInstance, onMounted, onUnmounted} from 'vue'
+import {ref, shallowRef, computed, watch, nextTick, onMounted, onUnmounted} from 'vue'
 import Node from 'element-plus/es/components/tree/src/model/node'
-import {ElTree, ElMessage,ElMessageBox, ElPopconfirm} from 'element-plus'
-import { Search, InfoFilled, Star, StarFilled, Document, Folder, FolderOpened, Delete, Position, RemoveFilled } from "@element-plus/icons-vue"
+import {ElTree, ElDropdown, ElMessage,ElMessageBox} from 'element-plus'
+import { Search, Star, StarFilled, Document, Folder, FolderOpened, Delete, Position, RemoveFilled } from "@element-plus/icons-vue"
 import {getNoteLabel} from "@/libs/noteUtil"
 import { DEMO_ARTICLE_MD } from "@/libs/demoArticle"
 import { DEFAULT_COVER_BASE64 } from "@/assets/brand/defaultCoverBase64"
 import { useTtsStore, Tree } from "@/store/store"
 import { log, dir } from "@/libs/logger"
-import { readDir,readNotes} from "@/libs/fileHandler"
-import {updateTreeMenu} from "@/libs/treeMenu"
 import {remove, removeFolder, renameFile} from "@/libs/fileHandler"
 import { useI18n } from 'vue-i18n'
+import { collectVisibleNodes } from '@/libs/treePerformance'
 
 const { t } = useI18n()
 const ttsStore = useTtsStore();
-var {inputs,cnote ,treeMenu} = storeToRefs(ttsStore);
+const { treeMenu } = storeToRefs(ttsStore);
 
 const filterText = ref('')
 const treeRef = ref<InstanceType<typeof ElTree>>()
@@ -184,45 +165,25 @@ const renameInputRef = ref<HTMLInputElement | null>(null)
 
 const focusedNodeKey = ref<string | null>(null)
 
-function getVisibleNodes(): Tree[] {
-  // onNodeExpand/onNodeCollapse 已精确维护 ttsStore.treeMenu.expandedKeys，
-  // 无需在每次键盘导航时全量遍历树并写磁盘
-  const result: Tree[] = []
-  const expandedSet = new Set(ttsStore.treeMenu.expandedKeys || [])
-  const filter = filterText.value.trim()
-
-  function subtreeHasMatch(node: Tree): boolean {
-    if (node.label.includes(filter)) return true
-    if (node.children) {
-      return node.children.some(child => subtreeHasMatch(child))
-    }
-    return false
-  }
-
-  function traverse(nodes: Tree[]) {
-    for (const node of nodes) {
-      if (filter && !subtreeHasMatch(node)) continue
-      result.push(node)
-      if (node.isFolder && expandedSet.has(node.path) && node.children) {
-        traverse(node.children)
-      }
-    }
-  }
-
-  traverse(ttsStore.treeMenu.data as Tree[])
-  return result
-}
+// Element Plus can expand matching ancestors during filtering without changing
+// the persisted expanded keys. Navigate its actual visible state, cached by Vue.
+const visibleNodes = computed(() => collectVisibleNodes(
+  treeMenu.value.data as Tree[], key => treeRef.value?.getNode(key)
+))
+const visibleNodeIndex = computed(() => new Map(visibleNodes.value.map((node, index) => [node.path, index])))
+const starredPaths = computed(() => new Set<string>(ttsStore.favorites.starred))
 
 function handleTreeKeydown(event: KeyboardEvent) {
+  if ((event.target as HTMLElement)?.closest('input, textarea, button, [contenteditable=true]')) return
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(event.key) === -1) return
   event.preventDefault()
   event.stopPropagation()
 
-  const visible = getVisibleNodes()
+  const visible = visibleNodes.value
   if (visible.length === 0) return
 
   const currentIdx = focusedNodeKey.value
-    ? visible.findIndex(n => n.path === focusedNodeKey.value)
+    ? (visibleNodeIndex.value.get(focusedNodeKey.value) ?? -1)
     : -1
 
   if (event.key === 'ArrowDown') {
@@ -247,24 +208,20 @@ function handleTreeKeydown(event: KeyboardEvent) {
     if (currentIdx === -1) return
     const node = visible[currentIdx]
     if (node.isFolder) {
-      const keys = ttsStore.treeMenu.expandedKeys || []
-      if (!keys.includes(node.path)) {
-        ttsStore.treeMenu.expandedKeys = [...keys, node.path]
-        nextTick(() => {
-          treeRef.value?.getNode(node.path)?.expand()
-        })
+      const actual = treeRef.value?.getNode(node.path)
+      if (actual && !actual.expanded) {
+        onNodeExpand(node)
+        actual.expand()
       }
     }
   } else if (event.key === 'ArrowLeft') {
     if (currentIdx === -1) return
     const node = visible[currentIdx]
     if (node.isFolder) {
-      const keys = ttsStore.treeMenu.expandedKeys || []
-      if (keys.includes(node.path)) {
-        ttsStore.treeMenu.expandedKeys = keys.filter(k => k !== node.path)
-        nextTick(() => {
-          treeRef.value?.getNode(node.path)?.collapse()
-        })
+      const actual = treeRef.value?.getNode(node.path)
+      if (actual?.expanded) {
+        onNodeCollapse(node)
+        actual.collapse()
       }
     } else {
       const parentPath = dirname(node.path)
@@ -293,8 +250,7 @@ function confirmRename(data: Tree) {
     ttsStore.cnote.destTitle = newName
     ttsStore.cnote.title = data.label
     ttsStore.inputs.notePath = data.path
-    renameFile()
-    data.label = newName
+    if (renameFile()) data.label = newName
   }
   editingPath.value = ''
   editingName.value = ''
@@ -305,18 +261,14 @@ function cancelRename() {
   editingName.value = ''
 }
 
-var show = ref(false);
 
-const dropdownVisible = ref(false);
 
 // ── 展开状态管理 ────────────────────────────────────────────────────
 // 用户展开/折叠 → 内存立即更新，磁盘写防抖（避免每次操作同步阻塞主线程）
 // 数据刷新 / 启动  → restoreExpandedState() 从 store 恢复
 
-let _persistTimer: ReturnType<typeof setTimeout> | null = null
 function schedulePersist() {
-  if (_persistTimer) clearTimeout(_persistTimer)
-  _persistTimer = setTimeout(() => ttsStore.persistExpandedKeys(), 600)
+  ttsStore.persistExpandedKeys()
 }
 
 function restoreExpandedState() {
@@ -333,6 +285,7 @@ function restoreExpandedState() {
 }
 
 function onNodeExpand(data: Tree) {
+  closeMenu()
   const keys = ttsStore.treeMenu.expandedKeys || []
   if (!keys.includes(data.path)) {
     ttsStore.treeMenu.expandedKeys = [...keys, data.path]
@@ -341,36 +294,62 @@ function onNodeExpand(data: Tree) {
 }
 
 function onNodeCollapse(data: Tree) {
+  closeMenu()
   ttsStore.treeMenu.expandedKeys = (ttsStore.treeMenu.expandedKeys || []).filter(k => k !== data.path)
   schedulePersist()
 }
 
 // 数据刷新后新节点默认折叠，重新恢复展开状态
 watch(() => ttsStore.treeMenu.data, () => {
+  closeMenu()
+  activeMenu.value = null
   focusedNodeKey.value = null
   restoreExpandedState()
+  nextTick(() => treeRef.value?.filter(filterText.value.trim()))
 }, { deep: false })
 
 
 
-const showItemMenu = () => {
-    show.value = true;
-  };
+const activeMenu = shallowRef<{ data: Tree; node: Node } | null>(null)
+const menuRef = ref<InstanceType<typeof ElDropdown>>()
+const menuListRef = ref<{ $el: HTMLElement }>()
+const menuPosition = ref({ x: 0, y: 0 })
+let menuRequest = 0
+let menuOpener: HTMLElement | null = null
+let keyboardMenu = false
 
-  const dropdownPosition = ref({ x: 0, y: 0 });
-  const handleContextMenu = (node:any, event:any) => {
-      dropdownPosition.value = { x: event.clientX, y: event.clientY };
-      dropdownVisible.value = true;
-    };
+function closeMenu(restoreFocus = false) {
+  ++menuRequest
+  menuRef.value?.handleClose()
+  if (restoreFocus && menuOpener?.isConnected) menuOpener.focus()
+}
 
+async function openMenu(data: Tree, node: Node, event: MouseEvent) {
+  closeMenu()
+  const request = ++menuRequest
+  menuOpener = event.currentTarget as HTMLElement
+  keyboardMenu = event.detail === 0 && event.type !== 'contextmenu'
+  const rect = menuOpener?.getBoundingClientRect()
+  menuPosition.value = event.type === 'contextmenu'
+    ? { x: event.clientX, y: event.clientY }
+    : { x: rect?.left || 0, y: rect?.bottom || 0 }
+  activeMenu.value = { data, node }
+  await nextTick()
+  if (request === menuRequest) menuRef.value?.handleOpen()
+}
 
+function openContextMenu(event: MouseEvent, data: Tree, node: Node) {
+  event.preventDefault()
+  void openMenu(data, node, event)
+}
 
+function onMenuVisibility(visible: boolean) {
+  if (visible && keyboardMenu) nextTick(() => {
+    menuListRef.value?.$el.querySelector<HTMLElement>('[role="menuitem"]')?.focus()
+  })
+}
 
-    const handleDropdownItemClick = () => {
-      dropdownVisible.value = false;
-    };
-
-
+watch(() => ttsStore.page.asideIndex, () => closeMenu())
 
 const handleCommand = (command: any) => {
     log('[FileTree] command:', command.type, command.data?.path)
@@ -437,12 +416,6 @@ const handleCommand = (command: any) => {
     }
   }
 
-const defaultProps = {
-    children: 'children',
-    label: 'label',
-    isLeaf:true
-  }
-
 watch(
   () => ttsStore.config.needUpdateTree, (newValue, oldValue) => {
     // do something
@@ -454,8 +427,9 @@ watch(
 // 防抖过滤：每次按键立即触发 el-tree.filter 会遍历全树重渲染，体感卡顿
 let _filterTimer: ReturnType<typeof setTimeout> | null = null
 watch(filterText, (val) => {
+  closeMenu()
   if (_filterTimer) clearTimeout(_filterTimer)
-  _filterTimer = setTimeout(() => treeRef.value?.filter(val), 300)
+  _filterTimer = setTimeout(() => treeRef.value?.filter(val.trim()), 300)
 })
 
 // 外部跳转（expandTreeToPath）新增了 key，展开对应节点
@@ -478,24 +452,23 @@ watch(
 )
 
 onMounted(() => {
-  cancelEvent()
+  window.addEventListener('blur', handleWindowBlur)
   // el-tree 初始化是同步的，一个 nextTick 就够；
   // v-show 保留 el-tree 内存状态，最小化/切 tab 回来无需重设
   nextTick(() => restoreExpandedState())
 })
 
-onUnmounted(() => {})
+const handleWindowBlur = () => closeMenu()
 
-function cancelEvent(){
-
-}
+onUnmounted(() => {
+  closeMenu()
+  window.removeEventListener('blur', handleWindowBlur)
+  if (_filterTimer) clearTimeout(_filterTimer)
+})
 
 const filterNode:any = (value: string, data: Tree,node:Node) => {
   if (!value) return true
   return data.label.includes(value)
-}
-
-function loadHandler(data:any){
 }
 
 const addFolder = () =>{
@@ -579,6 +552,7 @@ const handleNodeClick = ((itemdata: Tree,node:Node) => {
     ttsStore.inputs.itemData = itemdata
     focusedNodeKey.value = itemdata.path
    if(!itemdata.isFolder && fs.existsSync(itemdata.path)){
+    if (ttsStore.cnote.lastPath === itemdata.path && ttsStore.inputs.notePath === itemdata.path) return
     ttsStore.inputs.notePath = itemdata.path;
     ttsStore.cnote.title = itemdata.label;
     ttsStore.cnote.destTitle = itemdata.label;
@@ -666,7 +640,14 @@ const handleNodeClick = ((itemdata: Tree,node:Node) => {
 .el-dropdown{
   vertical-align: middle;
 }
+  .menu-anchor { display: block; width: 1px; height: 1px; pointer-events: none; }
+
   .icon-add{
+    border: 0;
+    background: transparent;
+    padding: 0 2px;
+    font: inherit;
+    cursor: pointer;
     color: rgb(115, 117, 115);
     margin-right: 2px;
     float: right;

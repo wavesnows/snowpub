@@ -118,8 +118,7 @@ const createNote = async () => {
     const folderPath = path.join(notebookPath, 'notes')
     try {
       fs.mkdirSync(folderPath, { recursive: true })
-      ttsStore.refreshTreeData()
-      await new Promise(resolve => setTimeout(resolve, 200))
+      await ttsStore.refreshTreeData()
     } catch (error) {
       console.error('Failed to create folder:', error)
       return
@@ -142,8 +141,7 @@ Start writing your notes here.
 
   try {
     fs.writeFileSync(notePath, welcomeContent, 'utf8')
-    ttsStore.refreshTreeData()
-    await new Promise(resolve => setTimeout(resolve, 200))
+    await ttsStore.refreshTreeData()
     ttsStore.inputs.notePath = notePath
     ttsStore.cnote.title = 'Welcome'
     ttsStore.cnote.destTitle = 'Welcome'

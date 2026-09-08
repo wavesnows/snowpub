@@ -14,6 +14,7 @@ import { getFileHistory, getFileContentAtCommit, restoreFileToCommit, isFileInGi
 import { ElMessage } from 'element-plus';
 import { errorHandler } from '@/libs/errorHandler';
 import { log } from '@/libs/logger'
+import { readNotesAsync, sameTree, sortPinnedInPlace } from '@/libs/treePerformance'
 export interface Tree {
   label: string
   isLeaf:boolean
@@ -23,6 +24,30 @@ export interface Tree {
   }
 
 const store = defaultStore
+let preferenceTimer: ReturnType<typeof setTimeout> | undefined
+let pendingPreferences: Record<string, any> = {}
+let refreshGeneration = 0
+
+function queuePreferences(values: Record<string, any>) {
+  Object.assign(pendingPreferences, values)
+  if (preferenceTimer) clearTimeout(preferenceTimer)
+  preferenceTimer = setTimeout(flushPreferences, 600)
+}
+
+function flushPreferences() {
+  if (preferenceTimer) clearTimeout(preferenceTimer)
+  preferenceTimer = undefined
+  if (!Object.keys(pendingPreferences).length) return
+  // Preserve safeSet's undefined-as-delete behavior, with one read/write batch.
+  const values = store.store
+  for (const [key, value] of Object.entries(pendingPreferences)) {
+    if (value === undefined) delete values[key]
+    else values[key] = value
+  }
+  store.store = values
+  pendingPreferences = {}
+}
+
 
 // electron-store (conf) rejects undefined values — use delete() to clear
 function safeSet(key: string, value: any) {
@@ -262,16 +287,15 @@ export const useTtsStore = defineStore(DFConf.appName, {
   // 定义actions，类似于methods，用来修改state，做一些业务逻辑
   actions: {
     setLastEditNote(){
-      safeSet("lastPath", this.cnote.lastPath);
-      safeSet("title", this.cnote.title);
-      if (this.treeMenu.expandedKeys) {
-        store.set('expandedKeys', this.treeMenu.expandedKeys);
-      }
+      queuePreferences({
+        lastPath: this.cnote.lastPath,
+        title: this.cnote.title,
+        expandedKeys: this.treeMenu.expandedKeys || [],
+      });
     },
+    flushPendingPreferences() { flushPreferences(); },
     persistExpandedKeys() {
-      if (this.treeMenu.expandedKeys) {
-        store.set('expandedKeys', this.treeMenu.expandedKeys);
-      }
+      queuePreferences({ expandedKeys: this.treeMenu.expandedKeys || [] });
     },
     setSavePath() {
       store.set("savePath", this.config.savePath);
@@ -383,7 +407,11 @@ export const useTtsStore = defineStore(DFConf.appName, {
       if (this.recentFiles.length > 50) {
         this.recentFiles = this.recentFiles.slice(0, 50);
       }
-      store.set('recentFiles', this.recentFiles);
+      queuePreferences({ recentFiles: this.recentFiles });
+    },
+    removeRecentFile(filePath: string) {
+      this.recentFiles = this.recentFiles.filter(f => f.path !== filePath);
+      queuePreferences({ recentFiles: this.recentFiles });
     },
     togglePin(path: string) {
       const index = this.favorites.pinned.indexOf(path);
@@ -393,8 +421,8 @@ export const useTtsStore = defineStore(DFConf.appName, {
         this.favorites.pinned.push(path);
       }
       store.set('pinnedNotes', this.favorites.pinned);
-      // Use debounced refresh instead of immediate refresh
-      this.scheduleTreeRefresh();
+      sortPinnedInPlace(this.treeMenu.data, this.favorites.pinned);
+      this.buildFlatFileList();
     },
     toggleStar(path: string) {
       const index = this.favorites.starred.indexOf(path);
@@ -411,10 +439,23 @@ export const useTtsStore = defineStore(DFConf.appName, {
     isStarred(path: string): boolean {
       return this.favorites.starred.includes(path);
     },
-    refreshTreeData() {
-      const newData = readNotes(this.notebook.currentPath, this.favorites.pinned, this.showHiddenFiles);
-      this.treeMenu.data = [...newData];
-      this.buildFlatFileList();
+    async refreshTreeData() {
+      const generation = ++refreshGeneration;
+      const directory = this.notebook.currentPath;
+      const hidden = this.showHiddenFiles;
+      try {
+        const newData = await readNotesAsync(directory, hidden);
+        if (generation !== refreshGeneration || directory !== this.notebook.currentPath || hidden !== this.showHiddenFiles) return;
+        sortPinnedInPlace(newData, this.favorites.pinned);
+        if (sameTree(this.treeMenu.data, newData)) return;
+        this.treeMenu.data = newData;
+        this.buildFlatFileList();
+      } catch (error) {
+        console.error('Failed to refresh file tree:', error);
+        if (generation === refreshGeneration && directory === this.notebook.currentPath) {
+          ElMessage.error('目录刷新失败，请检查目录是否可访问');
+        }
+      }
     },
     buildFlatFileList() {
       const result: string[] = [];

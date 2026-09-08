@@ -65,9 +65,7 @@ function openFile(file: { path: string; label: string; time: number }) {
 }
 
 function removeRecent(path: string) {
-  ttsStore.recentFiles = ttsStore.recentFiles.filter((f: any) => f.path !== path)
-  const { store } = require('@/global/initLocalStore')
-  store.set('recentFiles', ttsStore.recentFiles)
+  ttsStore.removeRecentFile(path)
 }
 
 function formatTime(time: number): string {
