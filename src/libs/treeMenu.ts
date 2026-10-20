@@ -1,15 +1,17 @@
-import type Node from 'element-plus/es/components/tree/src/model/node'
-import { useTtsStore, Tree } from "@/store/store";
-import { log } from '@/libs/logger'
+import { useTtsStore, Tree } from '@/store/store'
 
-export function updateTreeMenu(){
-    log("update Tree")
-    const ttsStore = useTtsStore();
-    let treedata:Tree = ttsStore.treeMenu.treeData;
-    let node:Node = ttsStore.treeMenu.node;
-
-    const parent = node.parent
-    const children: Tree[] = parent.data.children || parent.data
-    const index = children.findIndex((d) => d.path === treedata.path)
-    children.splice(index, 1)
+// Tree rows are view snapshots, not the canonical notebook data. Remove by
+// path from the store rather than mutating the Element Plus node's parent.
+export function updateTreeMenu() {
+  const store = useTtsStore()
+  const target = store.treeMenu.treeData.path
+  function removeFrom(nodes: Tree[]): boolean {
+    const index = nodes.findIndex(node => node.path === target)
+    if (index >= 0) { nodes.splice(index, 1); return true }
+    return nodes.some(node => node.children && removeFrom(node.children))
+  }
+  if (removeFrom(store.treeMenu.data as Tree[])) {
+    store.treeMenu.revision++
+    store.buildFlatFileList()
+  }
 }

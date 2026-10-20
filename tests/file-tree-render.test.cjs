@@ -19,8 +19,11 @@ test('a large tree renders no per-row dropdowns and shares one menu with the cor
   const data = Array.from({ length: 1000 }, (_, i) => ({ label: `note ${i}`, path: `/notes/${i}.md`, isFolder: false }))
   const pins = []
   const commands = []
+  const writes = []
+  let refreshes = 0
   const state = vue.reactive({
-    treeMenu: { data, expandedKeys: [] }, page: { asideIndex: '1' }, config: {},
+    treeMenu: { data, expandedKeys: [] }, page: { asideIndex: '1' }, config: { wechat: {} },
+    refreshTreeData: async () => { refreshes++ },
     favorites: { starred: [] }, cnote: {}, inputs: {}, menu: {},
     isPinned: () => false, isStarred: () => false, togglePin: path => pins.push(path),
   })
@@ -33,10 +36,12 @@ test('a large tree renders no per-row dropdowns and shares one menu with the cor
     'element-plus': { ElTree: Tree, ElDropdown: Dropdown },
     '@element-plus/icons-vue': new Proxy({}, { get: () => pass('i') }),
     '@/store/store': { useTtsStore: () => state },
-    '@/libs/logger': { log() {}, dir() {} }, '@/libs/github': {}, '@/libs/noteUtil': {},
+    '@/libs/logger': { log() {}, dir() {} }, '@/libs/github': {}, '@/libs/noteUtil': { getNoteLabel: () => 'new-note' },
+    fs: { writeFileSync: (...args) => writes.push(args), mkdirSync: (...args) => writes.push(args) },
     '@/libs/fileHandler': {}, '@/libs/treeMenu': {},
     '@/libs/demoArticle': { DEMO_ARTICLE_MD: '' }, '@/assets/brand/defaultCoverBase64': { DEFAULT_COVER_BASE64: '' },
     'vue-i18n': { useI18n: () => ({ t: key => key }) },
+    '@/libs/treeView': { createTreeSnapshot: nodes => nodes, syncTreeView() {} },
     '@/libs/treePerformance': { collectVisibleNodes: () => [] },
   }
   const { descriptor } = parse(fs.readFileSync('src/components/aside/FileTree.vue', 'utf8'))
@@ -80,4 +85,13 @@ test('a large tree renders no per-row dropdowns and shares one menu with the cor
     : ['file', 'mdfile', 'folder', 'remove', 'showInFinder']
   assert.deepEqual(types, expected)
   assert.ok(commands.every(command => command.data.path === folder.path))
+  captured.handleCommand(commands.find(command => command.type === 'mdfile'))
+  assert.equal(writes[0][0], '/notes/folder/new-note.md')
+  assert.equal(refreshes, 1, 'new note refreshes canonical data')
+  assert.equal(folder.children.length, 0, 'creation must not mutate an isolated row snapshot')
+  state.treeMenu.treeData = folder
+  state.treeMenu.newFolderName = 'new-folder'
+  captured.addFolder()
+  assert.equal(writes[1][0], '/notes/folder/new-folder')
+  assert.equal(refreshes, 2, 'new folder refreshes canonical data')
 })

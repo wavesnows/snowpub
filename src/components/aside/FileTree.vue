@@ -10,7 +10,7 @@
     </div>
     <el-scrollbar height="100%" width="100%" tabindex="0" @keydown.capture="handleTreeKeydown" @scroll="closeMenu()">
     <el-tree
-      :data="treeMenu.data"
+      :data="renderData"
       @node-click="handleNodeClick"
       class="treemenu"
       node-key="path"
@@ -148,6 +148,7 @@ import { log, dir } from "@/libs/logger"
 import {remove, removeFolder, renameFile} from "@/libs/fileHandler"
 import { useI18n } from 'vue-i18n'
 import { collectVisibleNodes } from '@/libs/treePerformance'
+import { createTreeSnapshot, syncTreeView } from '@/libs/treeView'
 
 const { t } = useI18n()
 const ttsStore = useTtsStore();
@@ -155,6 +156,7 @@ const { treeMenu } = storeToRefs(ttsStore);
 
 const filterText = ref('')
 const treeRef = ref<InstanceType<typeof ElTree>>()
+const renderData = shallowRef(createTreeSnapshot(treeMenu.value.data as Tree[]))
 const dialogFormVisible = ref(false)
 const formLabelWidth = '120px';
 const expandedKeys = ref<string[]>([]);
@@ -300,13 +302,23 @@ function onNodeCollapse(data: Tree) {
 }
 
 // 数据刷新后新节点默认折叠，重新恢复展开状态
-watch(() => ttsStore.treeMenu.data, () => {
+watch([
+  () => ttsStore.treeMenu.data,
+  () => ttsStore.treeMenu.revision,
+  () => ttsStore.favorites.pinned?.join('\0'),
+], async () => {
   closeMenu()
   activeMenu.value = null
-  focusedNodeKey.value = null
+  await nextTick()
+  const root = treeRef.value?.store.root
+  if (!root) return
+  syncTreeView(root, ttsStore.treeMenu.data as Tree[])
+  if (focusedNodeKey.value && !treeRef.value?.getNode(focusedNodeKey.value)) focusedNodeKey.value = null
   restoreExpandedState()
-  nextTick(() => treeRef.value?.filter(filterText.value.trim()))
-}, { deep: false })
+  // New nodes already default to visible. An empty filter would traverse all
+  // 25k+ nodes even when only one directory changed.
+  if (filterText.value.trim()) nextTick(() => treeRef.value?.filter(filterText.value.trim()))
+})
 
 
 
@@ -477,23 +489,14 @@ const addFolder = () =>{
   dialogFormVisible.value = false;
   let foldername  = ttsStore.treeMenu.newFolderName;
   let path = join(data.path, foldername)
-  const newChild:Tree = {label: foldername, path: path, isFolder:true, isLeaf: true}
-  if (!data.children) {
-    data.children = []
-  }
-  data.children.push(newChild as Tree)
   fs.mkdirSync(join(data.path, foldername));
+  void ttsStore.refreshTreeData()
 
   }
 
   const appendMd = (data: Tree) => {
     let label:string = getNoteLabel();
     let path:any = join(data.path, label + '.md')
-    const newChild:Tree = {label: label, path: path, isFolder:false, isLeaf: true}
-    if (!data.children) {
-      data.children = []
-    }
-    data.children.push(newChild as Tree)
     ttsStore.inputs.notePath = path
     // 公众号笔记固定格式：front matter 元信息，发布时自动读取；作者取系统默认配置
     const template = [
@@ -507,6 +510,7 @@ const addFolder = () =>{
       ''
     ].join('\n')
     fs.writeFileSync(path, template, 'utf8')
+    void ttsStore.refreshTreeData()
   }
 
   // 新建「主题演示」笔记：内容与黄金样张同源（demoArticle.ts），覆盖全部排版元素，
@@ -536,11 +540,7 @@ const addFolder = () =>{
       DEMO_ARTICLE_MD,
     ].join('\n')
     fs.writeFileSync(path, template, 'utf8')
-    const newChild: Tree = { label, path, isFolder: false, isLeaf: true }
-    if (!data.children) {
-      data.children = []
-    }
-    data.children.push(newChild as Tree)
+    void ttsStore.refreshTreeData()
     ttsStore.inputs.notePath = path
   }
 

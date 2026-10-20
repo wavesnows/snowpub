@@ -116,6 +116,7 @@ export const useTtsStore = defineStore(DFConf.appName, {
         itemData:<Tree>{}
       },
       treeMenu:{
+        revision: 0,
         data:readNotes(store.get('currentNotebookPath') || defaultNotebookPath, store.get('pinnedNotes') || []),
         node:<Node>{},
         treeData:<Tree>{},
