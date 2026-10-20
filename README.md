@@ -4,6 +4,9 @@ A local-first WeChat Official Account writing & publishing tool built with Elect
 
 [官网](https://snowpub.wavesnows.com) · [Download](../../releases) · [Guide](https://snowpub.wavesnows.com/guide/) · [中文说明](README_CN.md)
 
+
+**v1.0.2 (2026-10-20)** — Incremental directory refresh improves large-notebook menu responsiveness and preserves selection and expansion. [Release](https://github.com/wavesnows/snowpub/releases/tag/v1.0.2)
+
 ---
 
 ![Snowpub](docs/Screenshot.png)

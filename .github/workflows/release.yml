@@ -9,12 +9,13 @@ permissions:
   contents: write
 
 jobs:
-  # ── 先创建 Release（非 Draft），再并行构建 ──
+  # Build into a draft; publish only after every installer has uploaded.
   create-release:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Create GitHub Release
-        run: gh release create ${{ github.ref_name }} --title "${{ github.ref_name }}" --notes "" --repo ${{ github.repository }}
+        run: gh release create ${{ github.ref_name }} --title "${{ github.ref_name }}" --draft --notes-file docs/release-notes-v1.0.2.md --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -27,7 +28,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
@@ -36,11 +37,14 @@ jobs:
       - name: Rebuild native modules for Electron
         run: npx electron-builder install-app-deps
 
+      - name: Check types
+        run: npx vue-tsc --noEmit
+
       - name: Build renderer & main process
         run: npx vite build
 
       - name: Package & publish (arm64 + x64)
-        run: npx electron-builder --mac --x64 --arm64 --publish always
+        run: npx electron-builder --mac --x64 --arm64 --publish always -c.npmRebuild=true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -53,7 +57,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
@@ -62,10 +66,22 @@ jobs:
       - name: Rebuild native modules for Electron
         run: npx electron-builder install-app-deps
 
+      - name: Check types
+        run: npx vue-tsc --noEmit
+
       - name: Build renderer & main process
         run: npx vite build
 
       - name: Package & publish (x64)
         run: npx electron-builder --win --x64 --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-release:
+    needs: [build-mac, build-win]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish completed release
+        run: gh release edit ${{ github.ref_name }} --draft=false --latest --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
