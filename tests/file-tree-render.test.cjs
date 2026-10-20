@@ -86,12 +86,12 @@ test('a large tree renders no per-row dropdowns and shares one menu with the cor
   assert.deepEqual(types, expected)
   assert.ok(commands.every(command => command.data.path === folder.path))
   captured.handleCommand(commands.find(command => command.type === 'mdfile'))
-  assert.equal(writes[0][0], '/notes/folder/new-note.md')
+  assert.equal(writes[0][0], require('node:path').join('/notes/folder', 'new-note.md'))
   assert.equal(refreshes, 1, 'new note refreshes canonical data')
   assert.equal(folder.children.length, 0, 'creation must not mutate an isolated row snapshot')
   state.treeMenu.treeData = folder
   state.treeMenu.newFolderName = 'new-folder'
   captured.addFolder()
-  assert.equal(writes[1][0], '/notes/folder/new-folder')
+  assert.equal(writes[1][0], require('node:path').join('/notes/folder', 'new-folder'))
   assert.equal(refreshes, 2, 'new folder refreshes canonical data')
 })
